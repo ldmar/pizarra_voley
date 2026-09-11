@@ -17,6 +17,10 @@
     font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;
     -webkit-tap-highlight-color:transparent;overscroll-behavior:none;
   }
+
+  /* ============================================================
+     LAYOUT ESCRITORIO (base)
+     ============================================================ */
   .app{
     display:grid;
     grid-template-columns:260px minmax(0,1fr) 370px;
@@ -24,7 +28,6 @@
     transition:grid-template-columns .25s ease;
   }
   .app.focus{grid-template-columns:minmax(0,1fr) 340px}
-  .app.focus .sidebar{display:none}
   .app.focus .notes{border-left:none}
 
   /* SIDEBAR */
@@ -99,40 +102,24 @@
     border-radius:8px;font-size:11px;line-height:1.5;color:#e8c9a8}
   .hint b{color:var(--accent)}
 
-  /* CRÉDITO OH MY GOCH! — en sidebar, anclado abajo */
+  /* CRÉDITO OH MY GOCH! */
   .sidebar-footer{
     flex-shrink:0;
     border-top:1px solid var(--line);
     padding:10px 14px 12px;
     background:linear-gradient(180deg, rgba(255,138,61,0) 0%, rgba(255,138,61,.04) 100%);
   }
-  .omg-credit{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:4px;
-    text-align:center;
-  }
-  .omg-credit .omg-logo{
-    font-size:13px;font-weight:800;letter-spacing:.2px;
-    color:#e8eef7;text-decoration:none;
-    display:inline-flex;align-items:baseline;gap:3px;
-    transition:.15s;
-  }
+  .omg-credit{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+  .omg-credit .omg-logo{font-size:13px;font-weight:800;letter-spacing:.2px;
+    color:#e8eef7;text-decoration:none;display:inline-flex;align-items:baseline;gap:3px;
+    transition:.15s}
   .omg-credit .omg-logo:hover{color:#fff;text-shadow:0 0 12px rgba(255,138,61,.45)}
   .omg-credit .omg-logo .omg-accent{color:var(--accent)}
-  .omg-credit .omg-tagline{
-    font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;
-    color:var(--muted);line-height:1.2;
-  }
-  .omg-credit .omg-link{
-    font-size:9.5px;color:#7db4ff;text-decoration:none;
-    border-bottom:1px dashed rgba(125,180,255,.35);
-    padding-bottom:1px;transition:.15s;margin-top:2px;
-  }
-  .omg-credit .omg-link:hover{
-    color:#a8d0ff;border-bottom-color:rgba(168,208,255,.8);
-  }
+  .omg-credit .omg-tagline{font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--muted);line-height:1.2}
+  .omg-credit .omg-link{font-size:9.5px;color:#7db4ff;text-decoration:none;
+    border-bottom:1px dashed rgba(125,180,255,.35);padding-bottom:1px;transition:.15s;margin-top:2px}
+  .omg-credit .omg-link:hover{color:#a8d0ff;border-bottom-color:rgba(168,208,255,.8)}
 
   /* STAGE */
   .stage{display:flex;flex-direction:column;min-height:0;min-width:0;
@@ -156,7 +143,7 @@
   .ghost:hover{background:#26374f;color:#fff;border-color:var(--accent);
     box-shadow:0 4px 16px rgba(255,138,61,.25)}
 
-  /* BOTÓN HAMBURGUESA (solo móvil/tablet) */
+  /* BOTÓN HAMBURGUESA */
   .btn-menu{
     display:none;
     background:#1d2a3f;border:1px solid #2f4a6e;color:#e8eef7;
@@ -200,7 +187,8 @@
   #court.tool-erase{cursor:cell}
   #court.tool-dot{cursor:copy}
 
-  .controls{display:flex;align-items:center;gap:10px;padding:8px 18px 12px;flex-shrink:0}
+  .controls{display:flex;align-items:center;gap:10px;
+    padding:8px 18px 12px;flex-shrink:0}
   .ctrl-btn{background:linear-gradient(140deg,#ff8a3d,#ff6b35);
     border:none;color:#1a0d04;font-weight:800;font-size:11.5px;
     padding:9px 16px;border-radius:9px;cursor:pointer;font-family:inherit;
@@ -250,41 +238,20 @@
   .legend span{display:flex;align-items:center;gap:5px}
   .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 
-  /* Crédito al final del panel de notas */
-  .notes-credit{
-    margin-top:auto;
-    padding-top:18px;
-    border-top:1px solid var(--line);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:5px;
-    text-align:center;
-  }
-  .notes-credit .nc-label{
-    font-size:9px;letter-spacing:1.4px;text-transform:uppercase;
-    color:var(--muted);margin-bottom:2px;
-  }
-  .notes-credit .nc-logo{
-    font-size:14px;font-weight:800;letter-spacing:.3px;
-    color:#e8eef7;text-decoration:none;
-    display:inline-flex;align-items:baseline;gap:3px;
-    transition:.15s;
-  }
+  .notes-credit{margin-top:auto;padding-top:18px;border-top:1px solid var(--line);
+    display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+  .notes-credit .nc-label{font-size:9px;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--muted);margin-bottom:2px}
+  .notes-credit .nc-logo{font-size:14px;font-weight:800;letter-spacing:.3px;
+    color:#e8eef7;text-decoration:none;display:inline-flex;align-items:baseline;gap:3px;
+    transition:.15s}
   .notes-credit .nc-logo:hover{color:#fff;text-shadow:0 0 12px rgba(255,138,61,.45)}
   .notes-credit .nc-logo .nc-accent{color:var(--accent)}
-  .notes-credit .nc-tag{
-    font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
-    color:var(--muted);line-height:1.2;
-  }
-  .notes-credit .nc-link{
-    font-size:10.5px;color:#7db4ff;text-decoration:none;
-    border-bottom:1px dashed rgba(125,180,255,.35);
-    padding-bottom:1px;transition:.15s;margin-top:2px;
-  }
-  .notes-credit .nc-link:hover{
-    color:#a8d0ff;border-bottom-color:rgba(168,208,255,.8);
-  }
+  .notes-credit .nc-tag{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--muted);line-height:1.2}
+  .notes-credit .nc-link{font-size:10.5px;color:#7db4ff;text-decoration:none;
+    border-bottom:1px dashed rgba(125,180,255,.35);padding-bottom:1px;transition:.15s;margin-top:2px}
+  .notes-credit .nc-link:hover{color:#a8d0ff;border-bottom-color:rgba(168,208,255,.8)}
 
   /* MODAL */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);
@@ -326,27 +293,39 @@
   .dot-figure{cursor:pointer;transition:filter .15s}
   .dot-figure:hover{filter:drop-shadow(0 0 6px rgba(255,255,255,.6))}
 
-  /* RESPONSIVE */
-  @media (max-width:1200px) and (orientation:landscape){
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+
+  /* Solo el focus oculta el sidebar en desktop */
+  @media (min-width:901px){
+    .app.focus .sidebar{display:none}
+  }
+
+  /* Tablet horizontal mediana */
+  @media (max-width:1200px) and (min-width:901px) and (orientation:landscape){
     .app{grid-template-columns:210px minmax(0,1fr) 300px}
     .app.focus{grid-template-columns:minmax(0,1fr) 280px}
     .notes{padding:14px 12px 20px}
   }
 
+  /* ============================================================
+     MÓVIL Y TABLET VERTICAL (<=900px) — FLEX + DRAWER
+     ============================================================ */
   @media (max-width:900px){
     /* Activar botón hamburguesa */
     .btn-menu{display:flex}
 
-    /* Convertir el sidebar en drawer */
+    /* El app pasa a ser flex vertical */
     .app{
-      grid-template-columns:1fr;
-      grid-template-rows:auto 1fr auto;
-      height:100vh;height:100dvh;
+      display:flex;
+      flex-direction:column;
+      height:100vh;
+      height:100dvh;
       overflow:hidden;
     }
-    .app.focus{grid-template-columns:1fr}
-    .app.focus .notes{border-left:none;border-top:1px solid var(--line)}
 
+    /* Sidebar como drawer fixed (oculto por defecto) */
     .sidebar{
       position:fixed;
       top:0;left:0;bottom:0;
@@ -358,27 +337,45 @@
       box-shadow:4px 0 24px rgba(0,0,0,.5);
       display:flex !important;
       border-right:1px solid var(--line);
+      padding-left:max(0px, env(safe-area-inset-left));
     }
     .sidebar.open{transform:translateX(0)}
 
-    /* El stage ocupa todo el ancho */
-    .stage{grid-column:1;grid-row:1/4}
+    /* Stage ocupa todo el alto disponible */
+    .stage{
+      flex:1 1 auto;
+      min-height:0;
+      height:auto;
+      overflow:hidden;
+    }
 
     .stage-head{padding:8px 12px 6px;gap:8px}
     .stage-head h2{font-size:15px}
     .stage-head p{font-size:10.5px}
 
-    .court-wrap{flex:1}
-    .controls{padding:8px 12px 12px;gap:6px}
+    /* La cancha toma el espacio del medio */
+    .court-wrap{
+      flex:1 1 auto;
+      min-height:0;
+      padding:6px 8px;
+    }
+
+    /* Los controles SIEMPRE visibles, anclados abajo del stage */
+    .controls{
+      padding:8px 12px 12px;
+      gap:6px;
+      flex-shrink:0;
+    }
     .ctrl-btn{padding:8px 12px;font-size:11px}
     .time{font-size:10px;min-width:30px}
 
-    /* Notas como panel inferior */
+    /* Notas debajo, con scroll propio y altura limitada */
     .notes{
-      grid-column:1;grid-row:3;
+      flex:0 0 auto;
+      max-height:38vh;
+      overflow-y:auto;
       border-left:none;
       border-top:1px solid var(--line);
-      max-height:45vh;
       padding:14px 12px 20px;
     }
     .notes h3{font-size:9.5px}
@@ -388,6 +385,7 @@
     .ghost{padding:8px 10px;font-size:11px}
   }
 
+  /* Móvil chico */
   @media (max-width:600px){
     .stage-head h2{font-size:14px}
     .stage-head p{font-size:10px}
@@ -396,6 +394,7 @@
     .btn-menu{width:38px;height:38px;font-size:18px}
     .hide-sm{display:none}
     .sidebar{width:260px}
+    .notes{max-height:35vh}
   }
 
   @media (max-width:400px){
@@ -404,8 +403,26 @@
     .ctrl-btn{padding:6px 8px;font-size:9.5px}
     .btn-menu{width:36px;height:36px;font-size:17px}
     .sidebar{width:240px}
+    .notes{max-height:32vh}
   }
 
+  /* Móvil horizontal (landscape) — compacto */
+  @media (max-width:900px) and (max-height:500px) and (orientation:landscape){
+    .stage-head{padding:5px 10px 3px}
+    .stage-head h2{font-size:13px}
+    .stage-head p{display:none}
+    .phase-pill{font-size:8.5px;padding:2px 7px;margin-top:3px}
+    .controls{padding:5px 10px 6px;gap:5px}
+    .ctrl-btn{padding:6px 10px;font-size:10px}
+    .btn-menu{width:36px;height:36px;font-size:17px}
+    .court-wrap{padding:4px 6px}
+    .notes{max-height:32vh;padding:10px 12px 14px}
+    .notes h3{font-size:9px;margin:10px 0 4px}
+    .obj{font-size:10.5px;padding:8px}
+    .nlist li,.role-list li{font-size:10px}
+  }
+
+  /* Pantallas grandes */
   @media (min-width:1600px){
     .app{grid-template-columns:320px minmax(0,1fr) 440px}
     .app.focus{grid-template-columns:minmax(0,1fr) 400px}
@@ -445,24 +462,7 @@
     .omg-credit .omg-logo{font-size:20px}
     .notes-credit .nc-logo{font-size:20px}
   }
-  @media (max-height:500px) and (orientation:landscape){
-    .app{grid-template-columns:170px minmax(0,1fr) 260px}
-    .app.focus{grid-template-columns:minmax(0,1fr) 240px}
-    .sidebar{display:flex}
-    .stage-head{padding:6px 10px 4px}
-    .stage-head h2{font-size:13px}
-    .stage-head p{display:none}
-    .controls{padding:6px 10px 8px}
-    .ctrl-btn{padding:6px 10px;font-size:10px}
-    .notes{padding:10px 10px 16px}
-    .notes h3{font-size:9px;margin:12px 0 5px}
-    .obj{font-size:10.5px;padding:8px}
-    .nlist li,.role-list li{font-size:10px}
-    .sidebar-footer{padding:8px 10px}
-    .omg-credit .omg-logo{font-size:12px}
-    .omg-credit .omg-tagline{font-size:7.5px}
-    .omg-credit .omg-link{font-size:8.5px}
-  }
+
   @supports(padding:max(0px)){
     .sidebar{padding-left:max(0px, env(safe-area-inset-left))}
     .notes{padding-right:max(0px, env(safe-area-inset-right))}
@@ -522,7 +522,6 @@
       </div>
     </div>
 
-    <!-- CRÉDITO OH MY GOCH! (sidebar) -->
     <div class="sidebar-footer">
       <div class="omg-credit">
         <a href="https://webohmygoch.onrender.com/" target="_blank" rel="noopener" class="omg-logo">
@@ -562,7 +561,6 @@
   </aside>
 </div>
 
-<!-- Overlay para el drawer móvil -->
 <div class="drawer-overlay" id="drawerOverlay"></div>
 
 <div class="modal-overlay" id="editModal">
@@ -1885,7 +1883,6 @@ function updatePlayBtn(){
    CAMBIO DE MODO
    ============================================================ */
 function setMode(mode){
-  // Cerrar el drawer en móvil
   if(window.innerWidth <= 900 && window.__closeDrawer){
     window.__closeDrawer();
   }
@@ -2124,7 +2121,7 @@ document.addEventListener('keydown', e=>{
 });
 
 /* ============================================================
-   DRAWER MÓVIL — Abrir/cerrar el menú lateral
+   DRAWER MÓVIL
    ============================================================ */
 (function setupDrawer(){
   const btnMenu = document.getElementById('btnMenu');
@@ -2157,21 +2154,18 @@ document.addEventListener('keydown', e=>{
     }
   });
 
-  // Cerrar al elegir una táctica
   document.querySelectorAll('.tac-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       if(window.innerWidth <= 900) closeDrawer();
     });
   });
 
-  // Cerrar al cambiar de modo
   document.querySelectorAll('.mode-tab').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       if(window.innerWidth <= 900) closeDrawer();
     });
   });
 
-  // Cerrar al redimensionar a escritorio
   window.addEventListener('resize', ()=>{
     if(window.innerWidth > 900) closeDrawer();
   });
