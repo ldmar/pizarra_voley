@@ -1,3 +1,13 @@
+<!--
+  ============================================================
+  PIZARRA TÁCTICA · GEI VÓLEY
+  Desarrollado por Oh my goch! · consultoría big data & IA
+  https://webohmygoch.onrender.com/
+  ------------------------------------------------------------
+  © 2026 Oh my goch! · Todos los derechos reservados.
+  Prohibida la reproducción o modificación sin autorización.
+  ============================================================
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -18,9 +28,6 @@
     -webkit-tap-highlight-color:transparent;overscroll-behavior:none;
   }
 
-  /* ============================================================
-     LAYOUT ESCRITORIO (base)
-     ============================================================ */
   .app{
     display:grid;
     grid-template-columns:260px minmax(0,1fr) 370px;
@@ -102,7 +109,6 @@
     border-radius:8px;font-size:11px;line-height:1.5;color:#e8c9a8}
   .hint b{color:var(--accent)}
 
-  /* CRÉDITO OH MY GOCH! */
   .sidebar-footer{
     flex-shrink:0;
     border-top:1px solid var(--line);
@@ -121,7 +127,6 @@
     border-bottom:1px dashed rgba(125,180,255,.35);padding-bottom:1px;transition:.15s;margin-top:2px}
   .omg-credit .omg-link:hover{color:#a8d0ff;border-bottom-color:rgba(168,208,255,.8)}
 
-  /* STAGE */
   .stage{display:flex;flex-direction:column;min-height:0;min-width:0;
     height:100%;overflow:hidden;
     background:radial-gradient(1200px 700px at 50% -10%,#16223a 0%,#0a0f18 60%)}
@@ -143,7 +148,6 @@
   .ghost:hover{background:#26374f;color:#fff;border-color:var(--accent);
     box-shadow:0 4px 16px rgba(255,138,61,.25)}
 
-  /* BOTÓN HAMBURGUESA */
   .btn-menu{
     display:none;
     background:#1d2a3f;border:1px solid #2f4a6e;color:#e8eef7;
@@ -157,7 +161,6 @@
   .btn-menu:hover{background:#26374f;border-color:var(--accent)}
   .btn-menu:active{transform:scale(.95)}
 
-  /* OVERLAY del drawer */
   .drawer-overlay{
     position:fixed;inset:0;background:rgba(0,0,0,.6);
     opacity:0;visibility:hidden;transition:.25s;
@@ -165,7 +168,6 @@
   }
   .drawer-overlay.show{opacity:1;visibility:visible}
 
-  /* CONTENEDOR DE LA CANCHA */
   .court-wrap{
     position:relative;
     flex:1;
@@ -207,7 +209,6 @@
   .time{font-variant-numeric:tabular-nums;font-size:11px;color:var(--muted);
     min-width:36px;text-align:right}
 
-  /* NOTES */
   .notes{background:var(--panel);border-left:1px solid var(--line);
     overflow-y:auto;padding:16px 15px 24px;min-width:0;
     display:flex;flex-direction:column}
@@ -253,7 +254,6 @@
     border-bottom:1px dashed rgba(125,180,255,.35);padding-bottom:1px;transition:.15s;margin-top:2px}
   .notes-credit .nc-link:hover{color:#a8d0ff;border-bottom-color:rgba(168,208,255,.8)}
 
-  /* MODAL */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);
     display:none;align-items:center;justify-content:center;z-index:1100;
     padding:16px;backdrop-filter:blur(3px)}
@@ -279,7 +279,6 @@
   .btn-save{background:linear-gradient(140deg,#ff8a3d,#ff6b35);color:#1a0d04}
   .btn-save:hover{transform:translateY(-1px)}
 
-  /* SVG */
   .player circle{fill:var(--us);stroke:#dbeafe;stroke-width:2}
   .player.them circle{fill:var(--them);stroke:#fee2e2}
   .player text{fill:#fff;font-size:13px;font-weight:800;
@@ -293,30 +292,18 @@
   .dot-figure{cursor:pointer;transition:filter .15s}
   .dot-figure:hover{filter:drop-shadow(0 0 6px rgba(255,255,255,.6))}
 
-  /* ============================================================
-     RESPONSIVE
-     ============================================================ */
-
-  /* Solo el focus oculta el sidebar en desktop */
   @media (min-width:901px){
     .app.focus .sidebar{display:none}
   }
 
-  /* Tablet horizontal mediana */
   @media (max-width:1200px) and (min-width:901px) and (orientation:landscape){
     .app{grid-template-columns:210px minmax(0,1fr) 300px}
     .app.focus{grid-template-columns:minmax(0,1fr) 280px}
     .notes{padding:14px 12px 20px}
   }
 
-  /* ============================================================
-     MÓVIL Y TABLET VERTICAL (<=900px) — FLEX + DRAWER
-     ============================================================ */
   @media (max-width:900px){
-    /* Activar botón hamburguesa */
     .btn-menu{display:flex}
-
-    /* El app pasa a ser flex vertical */
     .app{
       display:flex;
       flex-direction:column;
@@ -324,8 +311,6 @@
       height:100dvh;
       overflow:hidden;
     }
-
-    /* Sidebar como drawer fixed (oculto por defecto) */
     .sidebar{
       position:fixed;
       top:0;left:0;bottom:0;
@@ -340,36 +325,14 @@
       padding-left:max(0px, env(safe-area-inset-left));
     }
     .sidebar.open{transform:translateX(0)}
-
-    /* Stage ocupa todo el alto disponible */
-    .stage{
-      flex:1 1 auto;
-      min-height:0;
-      height:auto;
-      overflow:hidden;
-    }
-
+    .stage{flex:1 1 auto;min-height:0;height:auto;overflow:hidden}
     .stage-head{padding:8px 12px 6px;gap:8px}
     .stage-head h2{font-size:15px}
     .stage-head p{font-size:10.5px}
-
-    /* La cancha toma el espacio del medio */
-    .court-wrap{
-      flex:1 1 auto;
-      min-height:0;
-      padding:6px 8px;
-    }
-
-    /* Los controles SIEMPRE visibles, anclados abajo del stage */
-    .controls{
-      padding:8px 12px 12px;
-      gap:6px;
-      flex-shrink:0;
-    }
+    .court-wrap{flex:1 1 auto;min-height:0;padding:6px 8px}
+    .controls{padding:8px 12px 12px;gap:6px;flex-shrink:0}
     .ctrl-btn{padding:8px 12px;font-size:11px}
     .time{font-size:10px;min-width:30px}
-
-    /* Notas debajo, con scroll propio y altura limitada */
     .notes{
       flex:0 0 auto;
       max-height:38vh;
@@ -381,11 +344,9 @@
     .notes h3{font-size:9.5px}
     .obj{font-size:11.5px;padding:10px}
     .nlist li,.role-list li{font-size:11px}
-
     .ghost{padding:8px 10px;font-size:11px}
   }
 
-  /* Móvil chico */
   @media (max-width:600px){
     .stage-head h2{font-size:14px}
     .stage-head p{font-size:10px}
@@ -406,7 +367,6 @@
     .notes{max-height:32vh}
   }
 
-  /* Móvil horizontal (landscape) — compacto */
   @media (max-width:900px) and (max-height:500px) and (orientation:landscape){
     .stage-head{padding:5px 10px 3px}
     .stage-head h2{font-size:13px}
@@ -422,7 +382,6 @@
     .nlist li,.role-list li{font-size:10px}
   }
 
-  /* Pantallas grandes */
   @media (min-width:1600px){
     .app{grid-template-columns:320px minmax(0,1fr) 440px}
     .app.focus{grid-template-columns:minmax(0,1fr) 400px}
@@ -517,7 +476,8 @@
         <button id="btnClear" class="ghost-btn" style="margin-top:5px">🗑 Limpiar toda la pizarra</button>
         <div class="hint">
           <b>Dibujá sobre la cancha</b> con el dedo o el mouse.<br>
-          <b>Trazo</b> = trayectoria. <b>Ficha</b> = jugador (tocala después para editarla).
+          <b>Trazo</b> = trayectoria. <b>Ficha</b> = jugador (tocala después para editarla).<br>
+          <b>💡 Movimiento:</b> poné una ficha, después trazá <b>empezando sobre la ficha</b> para que se mueva con la animación.
         </div>
       </div>
     </div>
@@ -1656,7 +1616,7 @@ function recomputeTiming(){
     s.t0 = t;
     let d;
     if(s.type === 'dot') d = 0.35;
-    else d = Math.min(2.6, Math.max(0.8, 0.3 + (s.points ? s.points.length : 0) * 0.022));
+    else d = Math.min(2.8, Math.max(1.0, 0.4 + (s.points ? s.points.length : 0) * 0.025));
     s.t1 = t + d;
     t = s.t1 + 0.12;
   });
@@ -1666,46 +1626,11 @@ function recomputeTiming(){
   }
 }
 
-function renderStroke(s, progress, layer){
+/* ============================================================
+   RENDER DE UN TRAZO (solo la línea)
+   ============================================================ */
+function renderPath(s, progress, layer){
   if(progress <= 0) return;
-
-  if(s.type === 'dot'){
-    const p = Math.min(1, progress);
-    const scale = 0.55 + 0.45 * p;
-    const g = el('g', {class:'dot-figure', opacity: p});
-
-    g.appendChild(el('circle', {cx:s.x, cy:s.y, r:16*scale,
-      fill:s.color, stroke:'#ffffff', 'stroke-width':2.5, opacity:.95}));
-
-    if(s.number !== undefined && s.number !== ''){
-      const numText = el('text', {
-        x: s.x, y: s.y,
-        'font-size': 13, 'font-weight': 900,
-        'text-anchor': 'middle', 'dominant-baseline': 'central',
-        fill: '#0a0f18', 'font-family': 'Segoe UI, sans-serif',
-        'pointer-events': 'none'
-      });
-      numText.textContent = s.number;
-      g.appendChild(numText);
-    }
-
-    if(s.name !== undefined && s.name !== ''){
-      const nameText = el('text', {
-        x: s.x, y: s.y + 26 * scale,
-        'font-size': 9, 'font-weight': 600,
-        'text-anchor': 'middle', 'dominant-baseline': 'hanging',
-        fill: '#ffffff', 'font-family': 'Segoe UI, sans-serif',
-        'paint-order': 'stroke',
-        stroke: '#000', 'stroke-width': 3, 'stroke-linejoin': 'round',
-        'pointer-events': 'none'
-      });
-      nameText.textContent = s.name;
-      g.appendChild(nameText);
-    }
-
-    layer.appendChild(g);
-    return;
-  }
 
   const pts = pointsAtProgress(s, progress);
   if(pts.length === 0) return;
@@ -1718,6 +1643,17 @@ function renderStroke(s, progress, layer){
   });
   path.style.filter = `drop-shadow(0 0 5px ${s.color}66)`;
   layer.appendChild(path);
+
+  // Anillo indicador si el trazo mueve una ficha
+  if(s.attachedTo && s.points.length > 0){
+    const start = s.points[0];
+    const ring = el('circle', {
+      cx: start[0], cy: start[1], r: 22,
+      fill:'none', stroke: s.color, 'stroke-width': 2,
+      'stroke-dasharray': '4 5', opacity: 0.65
+    });
+    layer.appendChild(ring);
+  }
 
   if(progress >= 0.94 && s.points.length >= 2){
     const n = s.points.length;
@@ -1738,21 +1674,96 @@ function renderStroke(s, progress, layer){
   }
 }
 
+/* ============================================================
+   RENDER DE UNA FICHA (permite moverla)
+   ============================================================ */
+function renderFicha(s, cx, cy, layer, progress){
+  const p = Math.max(0, Math.min(1, progress));
+  const scale = 0.55 + 0.45 * p;
+  const g = el('g', {class:'dot-figure', opacity: p});
+
+  g.appendChild(el('circle', {cx:cx, cy:cy, r:16*scale,
+    fill:s.color, stroke:'#ffffff', 'stroke-width':2.5, opacity:.95}));
+
+  if(s.number !== undefined && s.number !== ''){
+    const numText = el('text', {
+      x: cx, y: cy,
+      'font-size': 13, 'font-weight': 900,
+      'text-anchor': 'middle', 'dominant-baseline': 'central',
+      fill: '#0a0f18', 'font-family': 'Segoe UI, sans-serif',
+      'pointer-events': 'none'
+    });
+    numText.textContent = s.number;
+    g.appendChild(numText);
+  }
+
+  if(s.name !== undefined && s.name !== ''){
+    const nameText = el('text', {
+      x: cx, y: cy + 26 * scale,
+      'font-size': 9, 'font-weight': 600,
+      'text-anchor': 'middle', 'dominant-baseline': 'hanging',
+      fill: '#ffffff', 'font-family': 'Segoe UI, sans-serif',
+      'paint-order': 'stroke',
+      stroke: '#000', 'stroke-width': 3, 'stroke-linejoin': 'round',
+      'pointer-events': 'none'
+    });
+    nameText.textContent = s.name;
+    g.appendChild(nameText);
+  }
+
+  layer.appendChild(g);
+}
+
+/* ============================================================
+   RENDER PIZARRA LIBRE COMPLETA
+   ============================================================ */
 function renderFree(){
   const layer = getLayer('drawLayer');
   if(!layer) return;
   clearNode(layer);
 
-  strokes.forEach(s=>{
-    const span = Math.max(0.001, s.t1 - s.t0);
-    const p = (tNow - s.t0) / span;
-    if(p <= 0) return;
-    renderStroke(s, Math.min(1, p), layer);
+  const all = currentStroke ? [...strokes, currentStroke] : strokes;
+
+  // 1) TRAZOS primero (van al fondo)
+  all.forEach(s=>{
+    if(s.type !== 'path') return;
+    let p;
+    if(s === currentStroke) p = 1;
+    else {
+      const span = Math.max(0.001, s.t1 - s.t0);
+      p = (tNow - s.t0) / span;
+    }
+    if(p > 0) renderPath(s, Math.min(1, p), layer);
   });
 
-  if(currentStroke){
-    renderStroke(currentStroke, 1, layer);
-  }
+  // 2) FICHAS encima (pueden estar movidas por un trazo)
+  all.forEach(s=>{
+    if(s.type !== 'dot') return;
+
+    const mover = all.find(t => t.type === 'path' && t.attachedTo === s.id);
+
+    let cx = s.x, cy = s.y;
+    let animP = 1;
+
+    if(mover){
+      let p;
+      if(mover === currentStroke) p = 1; // mientras se dibuja, la ficha sigue el dedo
+      else {
+        const span = Math.max(0.001, mover.t1 - mover.t0);
+        p = (tNow - mover.t0) / span;
+      }
+      if(p > 0){
+        animP = Math.max(0, Math.min(1, p));
+        const pts = pointsAtProgress(mover, animP);
+        if(pts.length > 0){
+          cx = pts[pts.length-1][0];
+          cy = pts[pts.length-1][1];
+        }
+      }
+    }
+
+    renderFicha(s, cx, cy, layer, animP);
+  });
 
   const pill = document.getElementById('phasePill');
   if(!pill) return;
@@ -1830,17 +1841,18 @@ function renderFreeNotes(){
   let html = '';
   html += `<h3>Cómo usar la pizarra</h3>
     <div class="obj">
-      <b>1.</b> Elegí <b>Trazo</b> y dibujá la trayectoria.<br><br>
-      <b>2.</b> Usá <b>Ficha</b> para colocar jugadores. Al tocar una ficha ya colocada,
-      se abre el editor para ponerle <b>número y nombre</b>.<br><br>
-      <b>3.</b> Presioná <b>▶ Reproducir</b>.<br><br>
+      <b>1.</b> Elegí <b>Ficha</b> y colocá los jugadores donde empiezan la jugada.<br><br>
+      <b>2.</b> Cambiá a <b>Trazo</b> y dibujá desde cada ficha hacia donde querés que se mueva.
+      Vas a ver un <b>anillo punteado</b> cuando el trazo esté enganchado a la ficha.<br><br>
+      <b>3.</b> Presioná <b>▶ Reproducir</b>: vas a ver las fichas deslizándose por sus trayectorias.<br><br>
       <b>4.</b> Con <b>Deshacer</b> borrás el último; con <b>Limpiar</b> empezás de cero.
     </div>`;
   html += `<h3>Recomendaciones</h3>
     <ul class="nlist good">
-      <li>Dibujá <b>una acción a la vez</b>.</li>
+      <li>Primero colocá <b>todas las fichas</b>, después los trazos.</li>
+      <li>Empezá el trazo <b>sobre la ficha</b> para que se mueva con la animación.</li>
       <li>Usá <b>colores distintos por jugador</b>.</li>
-      <li>Marcá primero las <b>posiciones</b>, después las trayectorias.</li>
+      <li>Los trazos sin ficha funcionan como <b>trayectoria de pelota</b>.</li>
       <li>Reproducí en <b>cámara lenta</b> con la barra de tiempo.</li>
       <li>Podés <b>subir el escudo del club</b> tocando el logo GEI.</li>
     </ul>`;
@@ -1902,7 +1914,7 @@ function setMode(mode){
     if(dp) dp.style.display = 'block';
 
     document.getElementById('tacName').textContent = 'Pizarra libre';
-    document.getElementById('tacSub').textContent = 'Dibujá tu propia jugada. Tocá una ficha para editarla.';
+    document.getElementById('tacSub').textContent = 'Colocá fichas, trazá movimientos, reproducí.';
 
     clearTacticLayers();
     clearNode(getLayer('drawLayer'));
@@ -1951,7 +1963,9 @@ function onPointerDown(e){
 
   if(drawTool === 'dot'){
     strokes.push({
-      type:'dot', x:p.x, y:p.y, color: drawColor,
+      type:'dot',
+      id: 'dot_' + Date.now() + '_' + Math.random().toString(36).substr(2,9),
+      x:p.x, y:p.y, color: drawColor,
       number: '', name: '', t0:0, t1:0.35
     });
     recomputeTiming();
@@ -1972,8 +1986,23 @@ function onPointerDown(e){
     return;
   }
 
+  // Trazo: detectar si empieza sobre una ficha existente
   isDrawing = true;
-  currentStroke = { type:'path', points:[[p.x, p.y]], color: drawColor };
+  let attachedTo = null;
+  for(let i = strokes.length - 1; i >= 0; i--){
+    const s = strokes[i];
+    if(s.type === 'dot'){
+      const d = Math.hypot(s.x - p.x, s.y - p.y);
+      if(d < 36){ attachedTo = s.id; break; }
+    }
+  }
+
+  currentStroke = {
+    type:'path',
+    points:[[p.x, p.y]],
+    color: drawColor,
+    attachedTo: attachedTo
+  };
   try{ svg.setPointerCapture(e.pointerId); }catch(_){}
   render();
 }
@@ -2007,10 +2036,16 @@ function onPointerUp(e){
 
 function onSvgClick(e){
   if(!freeMode) return;
+  // Solo abrir el modal si NO se está por dibujar
   const p = svgPoint(e);
   const idx = hitTest(p.x, p.y);
-  if(idx >= 0 && strokes[idx].type === 'dot'){
-    openEditModal(idx);
+  if(idx >= 0 && strokes[idx].type === 'dot' && drawTool !== 'erase'){
+    // Si el toque fue muy cerca de la ficha, abrimos el editor
+    const s = strokes[idx];
+    const d = Math.hypot(s.x - p.x, s.y - p.y);
+    if(d < 22){
+      openEditModal(idx);
+    }
   }
 }
 
