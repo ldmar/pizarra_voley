@@ -156,6 +156,28 @@
   .ghost:hover{background:#26374f;color:#fff;border-color:var(--accent);
     box-shadow:0 4px 16px rgba(255,138,61,.25)}
 
+  /* BOTÓN HAMBURGUESA (solo móvil/tablet) */
+  .btn-menu{
+    display:none;
+    background:#1d2a3f;border:1px solid #2f4a6e;color:#e8eef7;
+    width:42px;height:42px;border-radius:10px;cursor:pointer;
+    font-size:20px;font-family:inherit;font-weight:700;
+    align-items:center;justify-content:center;
+    transition:.15s;flex-shrink:0;
+    box-shadow:0 2px 10px rgba(0,0,0,.25);
+    line-height:1;
+  }
+  .btn-menu:hover{background:#26374f;border-color:var(--accent)}
+  .btn-menu:active{transform:scale(.95)}
+
+  /* OVERLAY del drawer */
+  .drawer-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);
+    opacity:0;visibility:hidden;transition:.25s;
+    z-index:900;backdrop-filter:blur(2px);
+  }
+  .drawer-overlay.show{opacity:1;visibility:visible}
+
   /* CONTENEDOR DE LA CANCHA */
   .court-wrap{
     position:relative;
@@ -266,7 +288,7 @@
 
   /* MODAL */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);
-    display:none;align-items:center;justify-content:center;z-index:1000;
+    display:none;align-items:center;justify-content:center;z-index:1100;
     padding:16px;backdrop-filter:blur(3px)}
   .modal-overlay.show{display:flex}
   .modal{background:var(--panel);border:1px solid var(--line);
@@ -310,33 +332,80 @@
     .app.focus{grid-template-columns:minmax(0,1fr) 280px}
     .notes{padding:14px 12px 20px}
   }
-  @media (max-width:900px) and (orientation:portrait){
-    html,body{overflow:auto}
-    .app{grid-template-columns:1fr;grid-template-rows:auto 1fr auto;
-      height:auto;min-height:100vh;min-height:100dvh}
+
+  @media (max-width:900px){
+    /* Activar botón hamburguesa */
+    .btn-menu{display:flex}
+
+    /* Convertir el sidebar en drawer */
+    .app{
+      grid-template-columns:1fr;
+      grid-template-rows:auto 1fr auto;
+      height:100vh;height:100dvh;
+      overflow:hidden;
+    }
     .app.focus{grid-template-columns:1fr}
-    .sidebar{display:none}
-    .court-wrap{height:70vh;min-height:400px}
-    .notes{border-left:none;border-top:1px solid var(--line);padding:16px 14px 24px}
-    .stage-head{padding:10px 14px 6px}
-    .controls{padding:8px 14px 14px}
-  }
-  @media (max-width:600px){
+    .app.focus .notes{border-left:none;border-top:1px solid var(--line)}
+
+    .sidebar{
+      position:fixed;
+      top:0;left:0;bottom:0;
+      width:280px;
+      max-width:85vw;
+      z-index:1000;
+      transform:translateX(-100%);
+      transition:transform .28s cubic-bezier(.4,0,.2,1);
+      box-shadow:4px 0 24px rgba(0,0,0,.5);
+      display:flex !important;
+      border-right:1px solid var(--line);
+    }
+    .sidebar.open{transform:translateX(0)}
+
+    /* El stage ocupa todo el ancho */
+    .stage{grid-column:1;grid-row:1/4}
+
+    .stage-head{padding:8px 12px 6px;gap:8px}
     .stage-head h2{font-size:15px}
     .stage-head p{font-size:10.5px}
-    .controls{gap:6px}
+
+    .court-wrap{flex:1}
+    .controls{padding:8px 12px 12px;gap:6px}
     .ctrl-btn{padding:8px 12px;font-size:11px}
     .time{font-size:10px;min-width:30px}
+
+    /* Notas como panel inferior */
+    .notes{
+      grid-column:1;grid-row:3;
+      border-left:none;
+      border-top:1px solid var(--line);
+      max-height:45vh;
+      padding:14px 12px 20px;
+    }
     .notes h3{font-size:9.5px}
     .obj{font-size:11.5px;padding:10px}
     .nlist li,.role-list li{font-size:11px}
-    .hide-sm{display:none}
+
+    .ghost{padding:8px 10px;font-size:11px}
   }
-  @media (max-width:400px){
-    .stage-head h2{font-size:13.5px}
-    .stage-head p{display:none}
+
+  @media (max-width:600px){
+    .stage-head h2{font-size:14px}
+    .stage-head p{font-size:10px}
     .ctrl-btn{padding:7px 10px;font-size:10px}
+    .time{font-size:9px;min-width:26px}
+    .btn-menu{width:38px;height:38px;font-size:18px}
+    .hide-sm{display:none}
+    .sidebar{width:260px}
   }
+
+  @media (max-width:400px){
+    .stage-head h2{font-size:13px}
+    .stage-head p{display:none}
+    .ctrl-btn{padding:6px 8px;font-size:9.5px}
+    .btn-menu{width:36px;height:36px;font-size:17px}
+    .sidebar{width:240px}
+  }
+
   @media (min-width:1600px){
     .app{grid-template-columns:320px minmax(0,1fr) 440px}
     .app.focus{grid-template-columns:minmax(0,1fr) 400px}
@@ -401,33 +470,11 @@
     .sidebar-footer{padding-bottom:max(12px, env(safe-area-inset-bottom))}
   }
 </style>
-<!-- ===== PWA ===== -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ff8a3d">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Pizarra GEI">
-<meta name="application-name" content="Pizarra GEI">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('[PWA] Service Worker registrado'))
-        .catch(err => console.log('[PWA] Error al registrar SW:', err));
-    });
-  }
-</script>
-<!-- ===== /PWA ===== -->
 </head>
 <body>
 <div class="app" id="app">
 
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="logo" id="clubLogo" title="Clic para subir el escudo del club">
         <div class="fallback">GEI<small>VÓLEY</small></div>
@@ -475,7 +522,7 @@
       </div>
     </div>
 
-    <!-- ===== CRÉDITO OH MY GOCH! (sidebar) ===== -->
+    <!-- CRÉDITO OH MY GOCH! (sidebar) -->
     <div class="sidebar-footer">
       <div class="omg-credit">
         <a href="https://webohmygoch.onrender.com/" target="_blank" rel="noopener" class="omg-logo">
@@ -491,7 +538,8 @@
 
   <main class="stage">
     <div class="stage-head">
-      <div style="min-width:0">
+      <button class="btn-menu" id="btnMenu" title="Abrir menú" aria-label="Abrir menú">☰</button>
+      <div style="min-width:0;flex:1">
         <h2 id="tacName">Cargando…</h2>
         <p id="tacSub"></p>
         <span class="phase-pill" id="phasePill" style="display:none">Fase</span>
@@ -513,6 +561,9 @@
     <div class="obj">Elegí una táctica o pasá a <b>Pizarra libre</b> para dibujar tu propia jugada.</div>
   </aside>
 </div>
+
+<!-- Overlay para el drawer móvil -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
 
 <div class="modal-overlay" id="editModal">
   <div class="modal">
@@ -1834,6 +1885,11 @@ function updatePlayBtn(){
    CAMBIO DE MODO
    ============================================================ */
 function setMode(mode){
+  // Cerrar el drawer en móvil
+  if(window.innerWidth <= 900 && window.__closeDrawer){
+    window.__closeDrawer();
+  }
+
   if(mode === 'free'){
     freeMode = true;
     cur = null;
@@ -2066,6 +2122,62 @@ document.addEventListener('keydown', e=>{
     document.getElementById('btnUndo').click();
   }
 });
+
+/* ============================================================
+   DRAWER MÓVIL — Abrir/cerrar el menú lateral
+   ============================================================ */
+(function setupDrawer(){
+  const btnMenu = document.getElementById('btnMenu');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('drawerOverlay');
+
+  if(!btnMenu || !sidebar || !overlay) return;
+
+  function openDrawer(){
+    sidebar.classList.add('open');
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer(){
+    sidebar.classList.remove('open');
+    overlay.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function toggleDrawer(){
+    if(sidebar.classList.contains('open')) closeDrawer();
+    else openDrawer();
+  }
+
+  btnMenu.addEventListener('click', toggleDrawer);
+  overlay.addEventListener('click', closeDrawer);
+
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && sidebar.classList.contains('open')){
+      closeDrawer();
+    }
+  });
+
+  // Cerrar al elegir una táctica
+  document.querySelectorAll('.tac-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(window.innerWidth <= 900) closeDrawer();
+    });
+  });
+
+  // Cerrar al cambiar de modo
+  document.querySelectorAll('.mode-tab').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(window.innerWidth <= 900) closeDrawer();
+    });
+  });
+
+  // Cerrar al redimensionar a escritorio
+  window.addEventListener('resize', ()=>{
+    if(window.innerWidth > 900) closeDrawer();
+  });
+
+  window.__closeDrawer = closeDrawer;
+})();
 
 /* ============================================================
    UI PIZARRA LIBRE
