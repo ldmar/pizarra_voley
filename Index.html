@@ -1,0 +1,2568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Pizarra Táctica · GEI Vóley</title>
+<style>
+  :root{
+    --bg:#0a0f18; --panel:#121a28; --panel2:#182335; --line:#24334a;
+    --text:#e8eef7; --muted:#8ba0bd; --accent:#ff8a3d;
+    --us:#3b82f6; --them:#ef4444; --ball:#ffd23f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{background:var(--bg);color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;
+    -webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+
+  .app{display:grid;grid-template-columns:260px minmax(0,1fr) 370px;
+    height:100vh;height:100dvh;transition:grid-template-columns .25s ease}
+  .app.focus{grid-template-columns:minmax(0,1fr) 340px}
+  .app.focus .notes{border-left:none}
+
+  .sidebar{background:var(--panel);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;overflow:hidden;min-width:0}
+  .brand{display:flex;align-items:center;gap:10px;padding:12px 14px 10px;
+    border-bottom:1px solid var(--line);flex-shrink:0}
+  .brand .logo{width:44px;height:44px;border-radius:10px;overflow:hidden;
+    flex-shrink:0;display:grid;place-items:center;
+    background:linear-gradient(140deg,#1e3a5f,#0f1f33);
+    border:1px solid #2a4160;position:relative;cursor:pointer;transition:.15s}
+  .brand .logo:hover{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,138,61,.2)}
+  .brand .logo img{width:100%;height:100%;object-fit:contain;display:block}
+  .brand .logo .fallback{font-size:14px;font-weight:900;color:#7db4ff;
+    text-align:center;line-height:1.05;padding:2px;letter-spacing:.5px}
+  .brand .logo .fallback small{display:block;font-size:7px;color:#5a7a9a;letter-spacing:1.5px}
+  .brand-text{min-width:0;flex:1}
+  .brand-text h1{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand-text span{font-size:9px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+
+  .mode-tabs{display:flex;gap:4px;padding:8px 10px 6px;
+    border-bottom:1px solid var(--line);flex-shrink:0}
+  .mode-tab{flex:1;background:#0e1725;border:1px solid var(--line);
+    color:var(--muted);padding:8px 4px;border-radius:8px;
+    font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;
+    transition:.15s;white-space:nowrap}
+  .mode-tab.active{background:linear-gradient(140deg,#ff8a3d,#ff6b35);
+    color:#1a0d04;border-color:var(--accent);box-shadow:0 3px 12px rgba(255,107,53,.3)}
+  .mode-tab:hover:not(.active){background:#1b2739;color:#c4d2e4}
+
+  .sidebar-body{flex:1;overflow-y:auto;padding-bottom:12px;min-height:0}
+  .sidebar-body::-webkit-scrollbar{width:5px}
+  .sidebar-body::-webkit-scrollbar-thumb{background:#2a3a52;border-radius:3px}
+
+  .cat-title{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;
+    color:var(--muted);padding:12px 14px 5px;font-weight:700;
+    display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .cat-title .cat-count{font-size:8.5px;background:#1d2a3f;color:#7db4ff;
+    padding:1px 6px;border-radius:8px;letter-spacing:.5px}
+  .tac-btn{display:block;width:100%;text-align:left;background:transparent;
+    border:1px solid transparent;color:#c4d2e4;font-size:12px;line-height:1.35;
+    padding:8px 12px;border-radius:8px;cursor:pointer;transition:.15s;
+    font-family:inherit;border-left:3px solid transparent;
+    display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .tac-btn .tac-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tac-btn .tac-del{background:transparent;border:none;color:#6c7f99;
+    cursor:pointer;font-size:14px;padding:0 4px;line-height:1;border-radius:4px;
+    transition:.15s;flex-shrink:0}
+  .tac-btn .tac-del:hover{color:#ff6b35;background:rgba(255,107,53,.15)}
+  .tac-btn:hover{background:#1b2739;color:#fff}
+  .tac-btn.active{background:linear-gradient(90deg,rgba(255,138,61,.16),rgba(255,138,61,.04));
+    border-left-color:var(--accent);color:#fff;font-weight:600}
+
+  .nav-empty{padding:8px 14px;font-size:11px;color:#5a7a9a;
+    line-height:1.5;font-style:italic}
+
+  .tool-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;padding:0 10px}
+  .tool-btn{background:#0e1725;border:1px solid var(--line);color:#b9c9dd;
+    border-radius:8px;padding:8px 3px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-size:9.5px;font-family:inherit;font-weight:600;transition:.15s}
+  .tool-btn:hover{background:#1b2739;color:#fff}
+  .tool-btn.active{background:linear-gradient(140deg,rgba(255,138,61,.25),rgba(255,138,61,.08));
+    border-color:var(--accent);color:#fff;box-shadow:0 0 0 1px rgba(255,138,61,.35) inset}
+  .tool-btn svg{width:16px;height:16px}
+
+  .color-row{display:flex;gap:6px;padding:0 12px;flex-wrap:wrap}
+  .color-dot{width:28px;height:28px;border-radius:50%;border:2px solid transparent;
+    cursor:pointer;box-shadow:0 0 0 1px rgba(255,255,255,.12) inset;transition:.15s}
+  .color-dot:hover{transform:scale(1.08)}
+  .color-dot.active{border-color:#fff;
+    box-shadow:0 0 0 3px rgba(255,255,255,.15),0 0 12px rgba(255,255,255,.25)}
+
+  .ghost-btn{display:block;width:calc(100% - 20px);margin:0 auto;
+    background:#182335;border:1px solid var(--line);color:#c4d2e4;
+    padding:8px 12px;border-radius:8px;font-size:11.5px;cursor:pointer;
+    font-family:inherit;transition:.15s;font-weight:600;text-align:left}
+  .ghost-btn:hover{background:#22314a;color:#fff;border-color:#38507a}
+  .ghost-btn + .ghost-btn{margin-top:5px}
+  .ghost-btn.primary{background:linear-gradient(140deg,#ff8a3d,#ff6b35);
+    color:#1a0d04;border-color:var(--accent);font-weight:800;
+    box-shadow:0 3px 12px rgba(255,107,53,.25);text-align:center}
+  .ghost-btn.primary:hover{transform:translateY(-1px)}
+
+  .hint{margin:12px 14px 0;padding:10px 12px;
+    background:rgba(255,138,61,.08);border:1px solid rgba(255,138,61,.25);
+    border-radius:8px;font-size:11px;line-height:1.5;color:#e8c9a8}
+  .hint b{color:var(--accent)}
+
+  .sidebar-footer{flex-shrink:0;border-top:1px solid var(--line);
+    padding:10px 14px 12px;
+    background:linear-gradient(180deg, rgba(255,138,61,0) 0%, rgba(255,138,61,.04) 100%)}
+  .omg-credit{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+  .omg-credit .omg-logo{font-size:13px;font-weight:800;letter-spacing:.2px;
+    color:#e8eef7;text-decoration:none;display:inline-flex;align-items:baseline;gap:3px;
+    transition:.15s}
+  .omg-credit .omg-logo:hover{color:#fff;text-shadow:0 0 12px rgba(255,138,61,.45)}
+  .omg-credit .omg-logo .omg-accent{color:var(--accent)}
+  .omg-credit .omg-tagline{font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--muted);line-height:1.2}
+  .omg-credit .omg-link{font-size:9.5px;color:#7db4ff;text-decoration:none;
+    border-bottom:1px dashed rgba(125,180,255,.35);padding-bottom:1px;transition:.15s;margin-top:2px}
+  .omg-credit .omg-link:hover{color:#a8d0ff;border-bottom-color:rgba(168,208,255,.8)}
+
+  .stage{display:flex;flex-direction:column;min-height:0;min-width:0;
+    height:100%;overflow:hidden;
+    background:radial-gradient(1200px 700px at 50% -10%,#16223a 0%,#0a0f18 60%)}
+  .stage-head{display:flex;align-items:center;justify-content:space-between;
+    gap:12px;padding:10px 18px 6px;flex-shrink:0}
+  .stage-head h2{font-size:17px}
+  .stage-head p{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .phase-pill{display:inline-block;margin-top:5px;
+    background:rgba(255,138,61,.14);color:var(--accent);
+    border:1px solid rgba(255,138,61,.35);
+    font-size:9.5px;font-weight:700;letter-spacing:1.2px;
+    text-transform:uppercase;padding:3px 9px;border-radius:20px}
+  .phase-pill.free{background:rgba(59,130,246,.14);color:#7db4ff;
+    border-color:rgba(59,130,246,.4)}
+  .phase-pill.saved{background:rgba(62,201,138,.14);color:#3ec98a;
+    border-color:rgba(62,201,138,.4)}
+  .ghost{background:#1d2a3f;border:1px solid #2f4a6e;color:#e8eef7;
+    padding:9px 14px;border-radius:10px;font-size:12px;font-weight:600;
+    cursor:pointer;font-family:inherit;white-space:nowrap;transition:.15s;
+    box-shadow:0 2px 10px rgba(0,0,0,.25)}
+  .ghost:hover{background:#26374f;color:#fff;border-color:var(--accent);
+    box-shadow:0 4px 16px rgba(255,138,61,.25)}
+
+  .btn-menu{display:none;background:#1d2a3f;border:1px solid #2f4a6e;color:#e8eef7;
+    width:42px;height:42px;border-radius:10px;cursor:pointer;
+    font-size:20px;font-family:inherit;font-weight:700;
+    align-items:center;justify-content:center;
+    transition:.15s;flex-shrink:0;
+    box-shadow:0 2px 10px rgba(0,0,0,.25);line-height:1}
+  .btn-menu:hover{background:#26374f;border-color:var(--accent)}
+  .btn-menu:active{transform:scale(.95)}
+
+  .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);
+    opacity:0;visibility:hidden;transition:.25s;
+    z-index:900;backdrop-filter:blur(2px)}
+  .drawer-overlay.show{opacity:1;visibility:visible}
+
+  .court-wrap{position:relative;flex:1;min-height:0;min-width:0;
+    overflow:hidden;padding:8px}
+  #court{position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    display:block;touch-action:none;user-select:none;-webkit-user-select:none;
+    cursor:crosshair;
+    filter:drop-shadow(0 6px 22px rgba(0,0,0,.5));
+    border-radius:8px}
+  #court.tool-erase{cursor:cell}
+  #court.tool-dot{cursor:copy}
+
+  .controls{display:flex;align-items:center;gap:10px;
+    padding:8px 18px 12px;flex-shrink:0}
+  .ctrl-btn{background:linear-gradient(140deg,#ff8a3d,#ff6b35);
+    border:none;color:#1a0d04;font-weight:800;font-size:11.5px;
+    padding:9px 16px;border-radius:9px;cursor:pointer;font-family:inherit;
+    box-shadow:0 4px 16px rgba(255,107,53,.28);transition:.15s;white-space:nowrap}
+  .ctrl-btn:hover{transform:translateY(-1px)}
+  .ctrl-btn.sec{background:#1d2a3f;color:#c4d2e4;box-shadow:none;
+    border:1px solid var(--line);font-weight:600}
+  .ctrl-btn.sec:hover{background:#26374f}
+  #scrub{flex:1;-webkit-appearance:none;appearance:none;height:5px;
+    border-radius:3px;background:#22314a;outline:none;min-width:0}
+  #scrub::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;
+    border-radius:50%;background:var(--accent);cursor:pointer;
+    box-shadow:0 0 0 4px rgba(255,138,61,.2)}
+  #scrub::-moz-range-thumb{width:15px;height:15px;border-radius:50%;border:none;
+    background:var(--accent);cursor:pointer}
+  .time{font-variant-numeric:tabular-nums;font-size:11px;color:var(--muted);
+    min-width:36px;text-align:right}
+
+  .notes{background:var(--panel);border-left:1px solid var(--line);
+    overflow-y:auto;padding:16px 15px 24px;min-width:0;
+    display:flex;flex-direction:column}
+  .notes::-webkit-scrollbar{width:5px}
+  .notes::-webkit-scrollbar-thumb{background:#2a3a52;border-radius:3px}
+  .notes h3{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;
+    color:var(--accent);margin:16px 0 7px;font-weight:800;
+    display:flex;align-items:center;gap:6px}
+  .notes h3:first-child{margin-top:0}
+  .notes h3::before{content:'';width:3px;height:11px;background:var(--accent);border-radius:2px}
+  .obj{background:#16203166;border:1px solid #24334a;border-radius:10px;
+    padding:11px 12px;font-size:12px;line-height:1.55;color:#cfdcec}
+  .nlist{list-style:none;display:flex;flex-direction:column;gap:7px}
+  .nlist li{font-size:11.5px;line-height:1.5;color:#b9c9dd;
+    display:flex;gap:8px;align-items:flex-start}
+  .nlist li::before{content:'';flex:0 0 5px;height:5px;margin-top:6px;
+    border-radius:50%;background:#3d5a80}
+  .nlist.warn li::before{background:#e0574f}
+  .nlist.good li::before{background:#3ec98a}
+  .role-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+  .role-list li{display:flex;gap:8px;font-size:11.5px;line-height:1.45;
+    color:#b9c9dd;align-items:flex-start}
+  .badge{flex:0 0 20px;height:20px;border-radius:6px;display:grid;
+    place-items:center;font-size:10px;font-weight:800;background:var(--us);
+    color:#fff;margin-top:1px}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:5px;
+    font-size:10.5px;color:var(--muted)}
+  .legend span{display:flex;align-items:center;gap:5px}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+  .notes-credit{margin-top:auto;padding-top:18px;border-top:1px solid var(--line);
+    display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+  .notes-credit .nc-label{font-size:9px;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--muted);margin-bottom:2px}
+  .notes-credit .nc-logo{font-size:14px;font-weight:800;letter-spacing:.3px;
+    color:#e8eef7;text-decoration:none;display:inline-flex;align-items:baseline;gap:3px;
+    transition:.15s}
+  .notes-credit .nc-logo:hover{color:#fff;text-shadow:0 0 12px rgba(255,138,61,.45)}
+  .notes-credit .nc-logo .nc-accent{color:var(--accent)}
+  .notes-credit .nc-tag{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--muted);line-height:1.2}
+  .notes-credit .nc-link{font-size:10.5px;color:#7db4ff;text-decoration:none;
+    border-bottom:1px dashed rgba(125,180,255,.35);padding-bottom:1px;transition:.15s;margin-top:2px}
+  .notes-credit .nc-link:hover{color:#a8d0ff;border-bottom-color:rgba(168,208,255,.8)}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);
+    display:none;align-items:center;justify-content:center;z-index:1100;
+    padding:16px;backdrop-filter:blur(3px)}
+  .modal-overlay.show{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:18px;width:100%;max-width:400px;
+    box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .modal h3{font-size:14px;margin-bottom:14px;color:#fff;
+    display:flex;align-items:center;gap:8px}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:10.5px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:700}
+  .field input, .field select, .field textarea{
+    width:100%;background:#0e1725;border:1px solid var(--line);
+    color:#fff;padding:10px 12px;border-radius:8px;font-size:14px;
+    font-family:inherit;outline:none;transition:.15s;resize:none}
+  .field input:focus, .field select:focus, .field textarea:focus{
+    border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,138,61,.15)}
+  .modal-actions{display:flex;gap:8px;margin-top:16px}
+  .modal-actions button{flex:1;padding:10px;border-radius:8px;border:none;
+    font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;transition:.15s}
+  .btn-cancel{background:#1d2a3f;color:#c4d2e4;border:1px solid var(--line)!important}
+  .btn-cancel:hover{background:#26374f}
+  .btn-save{background:linear-gradient(140deg,#ff8a3d,#ff6b35);color:#1a0d04}
+  .btn-save:hover{transform:translateY(-1px)}
+  .btn-danger{background:#7f1d1d;color:#fecaca;border:1px solid #b91c1c!important}
+  .btn-danger:hover{background:#991b1b;color:#fff}
+
+  .player circle{fill:var(--us);stroke:#dbeafe;stroke-width:2}
+  .player.them circle{fill:var(--them);stroke:#fee2e2}
+  .player text{fill:#fff;font-size:13px;font-weight:800;
+    font-family:'Segoe UI',sans-serif;text-anchor:middle;
+    dominant-baseline:middle;pointer-events:none}
+  .player.key circle{stroke:var(--accent);stroke-width:3.5;
+    filter:drop-shadow(0 0 7px rgba(255,138,61,.9))}
+  .target-zone{fill:rgba(255,210,63,.10);stroke:rgba(255,210,63,.55);
+    stroke-width:2;stroke-dasharray:7 6;animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+  .dot-figure{cursor:pointer;transition:filter .15s}
+  .dot-figure:hover{filter:drop-shadow(0 0 6px rgba(255,255,255,.6))}
+
+  @media (min-width:901px){ .app.focus .sidebar{display:none} }
+
+  @media (max-width:1200px) and (min-width:901px) and (orientation:landscape){
+    .app{grid-template-columns:210px minmax(0,1fr) 300px}
+    .app.focus{grid-template-columns:minmax(0,1fr) 280px}
+    .notes{padding:14px 12px 20px}
+  }
+
+  @media (max-width:900px){
+    .btn-menu{display:flex}
+    .app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+    .sidebar{position:fixed;top:0;left:0;bottom:0;
+      width:280px;max-width:85vw;z-index:1000;
+      transform:translateX(-100%);
+      transition:transform .28s cubic-bezier(.4,0,.2,1);
+      box-shadow:4px 0 24px rgba(0,0,0,.5);
+      display:flex !important;border-right:1px solid var(--line);
+      padding-left:max(0px, env(safe-area-inset-left))}
+    .sidebar.open{transform:translateX(0)}
+    .stage{flex:1 1 auto;min-height:0;height:auto;overflow:hidden}
+    .stage-head{padding:8px 12px 6px;gap:8px}
+    .stage-head h2{font-size:15px}
+    .stage-head p{font-size:10.5px}
+    .court-wrap{flex:1 1 auto;min-height:0;padding:6px 8px}
+    .controls{padding:8px 12px 12px;gap:6px;flex-shrink:0}
+    .ctrl-btn{padding:8px 12px;font-size:11px}
+    .time{font-size:10px;min-width:30px}
+    .notes{flex:0 0 auto;max-height:38vh;overflow-y:auto;
+      border-left:none;border-top:1px solid var(--line);
+      padding:14px 12px 20px}
+    .notes h3{font-size:9.5px}
+    .obj{font-size:11.5px;padding:10px}
+    .nlist li,.role-list li{font-size:11px}
+    .ghost{padding:8px 10px;font-size:11px}
+  }
+  @media (max-width:600px){
+    .stage-head h2{font-size:14px}
+    .stage-head p{font-size:10px}
+    .ctrl-btn{padding:7px 10px;font-size:10px}
+    .time{font-size:9px;min-width:26px}
+    .btn-menu{width:38px;height:38px;font-size:18px}
+    .hide-sm{display:none}
+    .sidebar{width:260px}
+    .notes{max-height:35vh}
+  }
+  @media (max-width:400px){
+    .stage-head h2{font-size:13px}
+    .stage-head p{display:none}
+    .ctrl-btn{padding:6px 8px;font-size:9.5px}
+    .btn-menu{width:36px;height:36px;font-size:17px}
+    .sidebar{width:240px}
+    .notes{max-height:32vh}
+  }
+  @media (max-width:900px) and (max-height:500px) and (orientation:landscape){
+    .stage-head{padding:5px 10px 3px}
+    .stage-head h2{font-size:13px}
+    .stage-head p{display:none}
+    .phase-pill{font-size:8.5px;padding:2px 7px;margin-top:3px}
+    .controls{padding:5px 10px 6px;gap:5px}
+    .ctrl-btn{padding:6px 10px;font-size:10px}
+    .btn-menu{width:36px;height:36px;font-size:17px}
+    .court-wrap{padding:4px 6px}
+    .notes{max-height:32vh;padding:10px 12px 14px}
+    .notes h3{font-size:9px;margin:10px 0 4px}
+    .obj{font-size:10.5px;padding:8px}
+    .nlist li,.role-list li{font-size:10px}
+  }
+  @media (min-width:1600px){
+    .app{grid-template-columns:320px minmax(0,1fr) 440px}
+    .app.focus{grid-template-columns:minmax(0,1fr) 400px}
+    .brand-text h1{font-size:16px}
+    .brand-text span{font-size:11px}
+    .tac-btn{font-size:14px;padding:10px 14px}
+    .cat-title{font-size:11px}
+    .stage-head h2{font-size:22px}
+    .stage-head p{font-size:14px}
+    .notes h3{font-size:12px}
+    .obj{font-size:15px}
+    .nlist li,.role-list li{font-size:14px}
+    .ctrl-btn{font-size:14px;padding:12px 22px}
+    .time{font-size:14px}
+    .brand .logo{width:56px;height:56px}
+    .brand .logo .fallback{font-size:18px}
+    .brand .logo .fallback small{font-size:9px}
+    .mode-tab{font-size:13px;padding:10px 6px}
+    .omg-credit .omg-logo{font-size:16px}
+    .notes-credit .nc-logo{font-size:17px}
+  }
+  @media (min-width:2200px){
+    .app{grid-template-columns:380px minmax(0,1fr) 520px}
+    .app.focus{grid-template-columns:minmax(0,1fr) 480px}
+    .stage-head h2{font-size:26px}
+    .stage-head p{font-size:16px}
+    .brand .logo{width:64px;height:64px}
+    .brand .logo .fallback{font-size:22px}
+  }
+  @supports(padding:max(0px)){
+    .sidebar{padding-left:max(0px, env(safe-area-inset-left))}
+    .notes{padding-right:max(0px, env(safe-area-inset-right))}
+    .controls{padding-bottom:max(12px, env(safe-area-inset-bottom))}
+    .sidebar-footer{padding-bottom:max(12px, env(safe-area-inset-bottom))}
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo" id="clubLogo" title="Clic para subir el escudo del club">
+        <div class="fallback">GEI<small>VÓLEY</small></div>
+      </div>
+      <div class="brand-text">
+        <h1>Pizarra Táctica</h1>
+        <span>GEI Vóley · Ituzaingó</span>
+      </div>
+    </div>
+
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="tactics">Tácticas</button>
+      <button class="mode-tab" data-mode="free">Pizarra libre</button>
+    </div>
+
+    <div class="sidebar-body">
+      <nav id="nav"></nav>
+    <div id="drawPanel" style="display:none">
+      <div class="cat-title">Herramienta</div>
+      <div class="tool-grid">
+        <button class="tool-btn active" data-tool="path">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M3 19 Q 7 4 21 11"/><path d="M16 7 L 21 11 L 17 15"/>
+          </svg><span>Trazo</span>
+        </button>
+        <button class="tool-btn" data-tool="dot">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7.5"/></svg>
+          <span>Ficha</span>
+        </button>
+        <button class="tool-btn" data-tool="erase">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 20 L 9 15"/><path d="M7 17 L 15 9 L 20 14 L 15 19 Z"/><path d="M15 9 L 11 5 L 4 12 L 8 16"/>
+          </svg><span>Borrar</span>
+        </button>
+      </div>
+      <div class="cat-title">Color</div>
+      <div class="color-row" id="colorRow"></div>
+
+      <div class="cat-title">Acciones</div>
+      <button id="btnUndo" class="ghost-btn">↶ Deshacer último</button>
+      <button id="btnClear" class="ghost-btn" style="margin-top:5px">🗑 Limpiar toda la pizarra</button>
+
+      <div class="cat-title">Guardar y compartir</div>
+      <button id="btnSaveTactic" class="ghost-btn primary">💾 Guardar como táctica</button>
+      <button id="btnExport" class="ghost-btn">📤 Exportar mis tácticas</button>
+      <button id="btnImport" class="ghost-btn">📥 Importar tácticas</button>
+      <button id="btnLoadClub" class="ghost-btn">☁️ Cargar tácticas del club</button>
+      <input type="file" id="fileImport" accept=".json,application/json" style="display:none">
+
+      <div class="hint">
+        <b>Dibujá sobre la cancha</b> con el dedo o el mouse.<br>
+        <b>Trazo</b> = trayectoria. <b>Ficha</b> = jugador (tocala después para editarla).<br>
+        <b>💡 Movimiento:</b> empezá el trazo <b>sobre la ficha</b> para que se mueva.
+      </div>
+    </div>
+</div>
+
+    <div class="sidebar-footer">
+      <div class="omg-credit">
+        <a href="https://webohmygoch.onrender.com/" target="_blank" rel="noopener" class="omg-logo">
+          Oh my <span class="omg-accent">goch!</span>
+        </a>
+        <span class="omg-tagline">consultoría · big data & IA</span>
+        <a href="https://webohmygoch.onrender.com/" target="_blank" rel="noopener" class="omg-link">
+          webohmygoch.onrender.com
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <div class="stage-head">
+      <button class="btn-menu" id="btnMenu" title="Abrir menú" aria-label="Abrir menú">☰</button>
+      <div style="min-width:0;flex:1">
+        <h2 id="tacName">Cargando…</h2>
+        <p id="tacSub"></p>
+        <span class="phase-pill" id="phasePill" style="display:none">Fase</span>
+      </div>
+      <button class="ghost" id="btnFocus">⛶ <span class="hide-sm">Modo tiempo muerto</span></button>
+    </div>
+    <div class="court-wrap" id="courtWrap">
+      <svg id="court" viewBox="0 0 470 840" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    <div class="controls">
+      <button class="ctrl-btn" id="btnPlay">▶ <span class="hide-sm">Reproducir</span></button>
+      <button class="ctrl-btn sec" id="btnReset">⟲</button>
+      <input type="range" id="scrub" min="0" max="1000" value="0">
+      <span class="time" id="timeLabel">0.0s</span>
+    </div>
+  </main>
+
+  <aside class="notes" id="notes">
+    <div class="obj">Elegí una táctica o pasá a <b>Pizarra libre</b> para dibujar tu propia jugada.</div>
+  </aside>
+</div>
+
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+<!-- Modal editar ficha -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>✏️ Editar jugador</h3>
+    <div class="field">
+      <label for="editNumber">Número / Dorsal</label>
+      <input type="text" id="editNumber" maxlength="3" placeholder="Ej: 7" inputmode="numeric">
+    </div>
+    <div class="field">
+      <label for="editName">Nombre</label>
+      <input type="text" id="editName" maxlength="18" placeholder="Ej: Juan">
+    </div>
+    <div class="field">
+      <label>Color de ficha</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="editColorRow"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnEditCancel">Cancelar</button>
+      <button class="btn-save" id="btnEditSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal guardar táctica -->
+<div class="modal-overlay" id="saveModal">
+  <div class="modal">
+    <h3>💾 Guardar táctica</h3>
+    <div class="field">
+      <label for="saveName">Nombre de la táctica *</label>
+      <input type="text" id="saveName" maxlength="40" placeholder="Ej: Ataque 4 con cruce">
+    </div>
+    <div class="field">
+      <label for="saveCat">Categoría</label>
+      <select id="saveCat">
+        <option value="Saque">Saque</option>
+        <option value="Recepción">Recepción</option>
+        <option value="Ataque" selected>Ataque</option>
+        <option value="Bloqueo">Bloqueo</option>
+        <option value="Defensa">Defensa</option>
+        <option value="Transición">Transición</option>
+        <option value="Sistemas">Sistemas</option>
+        <option value="Otro">Otro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="saveDesc">Descripción corta (opcional)</label>
+      <textarea id="saveDesc" rows="2" maxlength="120" placeholder="Ej: Jugada para atacar por zona 4 después del cruce"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnSaveCancel">Cancelar</button>
+      <button class="btn-save" id="btnSaveConfirm">Guardar</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+
+/* ============================================================
+   VERIFICACIÓN DEFENSIVA DE IDs
+   Crea stubs si falta algo y reemplaza onclick por un helper seguro
+   ============================================================ */
+(function(){
+  const CRITICAL_IDS = [
+    'btnSaveTactic','btnExport','btnImport','btnLoadClub','fileImport',
+    'btnSaveCancel','btnSaveConfirm','btnEditCancel','btnEditSave',
+    'btnPlay','btnReset','btnFocus','btnUndo','btnClear','btnMenu',
+    'editModal','saveModal','clubLogo','nav','drawPanel',
+    'colorRow','editColorRow','court','courtWrap','notes'
+  ];
+  CRITICAL_IDS.forEach(id=>{
+    if(!document.getElementById(id)){
+      console.error('❌ FALTA el elemento #' + id + ' en tu HTML. La app va a fallar.');
+      // Crear stub temporal para no romper
+      const stub = document.createElement('div');
+      stub.id = id;
+      stub.style.display = 'none';
+      document.body.appendChild(stub);
+    }
+  });
+})();
+
+/* Helper seguro para asignar onclick */
+window.safeOn = function(id, handler){
+  const el = document.getElementById(id);
+  if(!el){
+    console.warn('[safeOn] Falta #' + id + ' — se ignora la asignación');
+    return;
+  }
+  el.onclick = handler;
+};
+window.safeAdd = function(id, event, handler){
+  const el = document.getElementById(id);
+  if(!el){
+    console.warn('[safeAdd] Falta #' + id + ' — se ignora la asignación');
+    return;
+  }
+  el.addEventListener(event, handler);
+};
+
+/* ============================================================
+   GEOMETRÍA
+   ============================================================ */
+const S = 40, MX = 55, MY = 60;
+const CW = 9 * S, CL = 18 * S;
+const X = m => MX + m * S;
+const Y = m => MY + m * S;
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('court');
+
+/* ============================================================
+   ESTADO GLOBAL
+   ============================================================ */
+let cur = null;
+let dur = 0.5, tNow = 0, playing = false, lastTs = 0;
+let els = { us:{}, them:{}, ball:null };
+let courtBuilt = false;
+
+let freeMode = false;
+let strokes = [];
+let currentStroke = null;
+let drawTool = 'path';
+let drawColor = '#ffd23f';
+let isDrawing = false;
+let editingStrokeIndex = -1;
+let currentSavedId = null;  // id de la táctica guardada actual, si aplica
+
+const COLORS = ['#ffd23f','#3b82f6','#ef4444','#22c55e','#ffffff','#ff8a3d','#a855f7','#ec4899'];
+const STORAGE_KEY = 'gei-pizarra-tacticas-v1';
+
+let savedTactics = [];
+let clubTactics = [];
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function el(tag, attrs){
+  const e = document.createElementNS(NS, tag);
+  if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function clearNode(n){ if(!n) return; while(n.firstChild) n.removeChild(n.firstChild); }
+function getLayer(id){ return document.getElementById(id) || null; }
+function uid(prefix){ return (prefix||'id') + '_' + Date.now() + '_' + Math.random().toString(36).substr(2,6); }
+function deepCopy(o){ return JSON.parse(JSON.stringify(o)); }
+
+/* ============================================================
+   PERSISTENCIA LOCAL
+   ============================================================ */
+function loadSavedFromStorage(){
+  try{
+    const data = localStorage.getItem(STORAGE_KEY);
+    savedTactics = data ? JSON.parse(data) : [];
+  }catch(_){ savedTactics = []; }
+}
+function persistSaved(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(savedTactics)); }catch(_){}
+}
+
+/* ============================================================
+   ESCUDO
+   ============================================================ */
+function setupClubLogo(){
+  const logoDiv = document.getElementById('clubLogo');
+  if(!logoDiv) return;
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.style.display = 'none';
+  document.body.appendChild(fileInput);
+  logoDiv.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      clearNode(logoDiv);
+      const img = document.createElement('img');
+      img.src = ev.target.result;
+      img.alt = 'Escudo GEI';
+      logoDiv.appendChild(img);
+      try{ localStorage.setItem('gei-logo', ev.target.result); }catch(_){}
+    };
+    reader.readAsDataURL(file);
+  });
+  try{
+    const saved = localStorage.getItem('gei-logo');
+    if(saved){
+      clearNode(logoDiv);
+      const img = document.createElement('img');
+      img.src = saved;
+      img.alt = 'Escudo GEI';
+      logoDiv.appendChild(img);
+    }
+  }catch(_){}
+}
+
+/* ============================================================
+   CONSTRUCCIÓN DE LA CANCHA
+   ============================================================ */
+function buildCourt(){
+  if(courtBuilt) return;
+  if(!svg) return;
+  const defs = el('defs');
+  const pat = el('pattern', {id:'netpat', width:'8', height:'8', patternUnits:'userSpaceOnUse'});
+  pat.appendChild(el('rect', {width:'8', height:'8', fill:'#0e1725'}));
+  pat.appendChild(el('path', {d:'M0 0 L8 8 M8 0 L0 8', stroke:'#5b7ba3', 'stroke-width':'1', opacity:'.55'}));
+  defs.appendChild(pat);
+  ['#ffd23f','#8aa8d0','#ff8a3d','#7dd3fc'].forEach((c,i)=>{
+    const m = el('marker', {id:'arw'+i, viewBox:'0 0 10 10', refX:'8', refY:'5',
+      markerWidth:'5', markerHeight:'5', orient:'auto-start-reverse'});
+    m.appendChild(el('path', {d:'M0 0 L10 5 L0 10 z', fill:c}));
+    defs.appendChild(m);
+  });
+  svg.appendChild(defs);
+
+  const g = el('g');
+  g.appendChild(el('rect', {x:MX, y:MY, width:CW, height:CL/2, fill:'#2b1a20', rx:2}));
+  g.appendChild(el('rect', {x:MX, y:MY+CL/2, width:CW, height:CL/2, fill:'#152a3e', rx:2}));
+
+  const theirZ = [[4,7.5,7.5],[3,4.5,7.5],[2,1.5,7.5],[5,7.5,3.0],[6,4.5,3.0],[1,1.5,3.0]];
+  theirZ.forEach(([n,x,y])=>{
+    const t = el('text', {x:X(x), y:Y(y), fill:'#fff', opacity:'.13',
+      'font-size':'30', 'font-weight':'800', 'text-anchor':'middle',
+      'dominant-baseline':'middle', 'font-family':'Segoe UI, sans-serif'});
+    t.textContent = n; g.appendChild(t);
+  });
+  const ourZ = [[4,1.5,13.5],[3,4.5,13.5],[2,7.5,13.5],[5,1.5,16.5],[6,4.5,16.5],[1,7.5,16.5]];
+  ourZ.forEach(([n,x,y])=>{
+    const t = el('text', {x:X(x), y:Y(y), fill:'#fff', opacity:'.13',
+      'font-size':'30', 'font-weight':'800', 'text-anchor':'middle',
+      'dominant-baseline':'middle', 'font-family':'Segoe UI, sans-serif'});
+    t.textContent = n; g.appendChild(t);
+  });
+
+  g.appendChild(el('line', {x1:MX, y1:Y(6), x2:MX+CW, y2:Y(6),
+    stroke:'#7fa6d0', 'stroke-width':'2', 'stroke-dasharray':'10 8', opacity:'.7'}));
+  g.appendChild(el('line', {x1:MX, y1:Y(12), x2:MX+CW, y2:Y(12),
+    stroke:'#7fa6d0', 'stroke-width':'2', 'stroke-dasharray':'10 8', opacity:'.7'}));
+  g.appendChild(el('rect', {x:MX, y:MY, width:CW, height:CL, fill:'none',
+    stroke:'#e6eef8', 'stroke-width':'3', opacity:'.85'}));
+
+  const netY = Y(9);
+  g.appendChild(el('rect', {x:MX-18, y:netY-6, width:CW+36, height:12,
+    fill:'url(#netpat)', stroke:'#cfe0f2', 'stroke-width':'2', rx:2}));
+  g.appendChild(el('line', {x1:MX-18, y1:netY-6, x2:MX+CW+18, y2:netY-6,
+    stroke:'#e6eef8', 'stroke-width':'2.5'}));
+  g.appendChild(el('line', {x1:MX-18, y1:netY+6, x2:MX+CW+18, y2:netY+6,
+    stroke:'#e6eef8', 'stroke-width':'2.5'}));
+
+  svg.appendChild(g);
+  svg.appendChild(el('g', {id:'targetLayer'}));
+  svg.appendChild(el('g', {id:'arrowLayer'}));
+  svg.appendChild(el('g', {id:'playerLayer'}));
+  svg.appendChild(el('g', {id:'ballLayer'}));
+  svg.appendChild(el('g', {id:'drawLayer'}));
+
+  courtBuilt = true;
+}
+
+function clearTacticLayers(){
+  ['targetLayer','arrowLayer','playerLayer','ballLayer'].forEach(id=>{
+    clearNode(getLayer(id));
+  });
+}
+
+/* ============================================================
+   INTERPOLACIÓN
+   ============================================================ */
+function interp(kfs, t, linear){
+  if(!kfs || !kfs.length) return null;
+  if(t <= kfs[0][2]) return [kfs[0][0], kfs[0][1]];
+  const L = kfs[kfs.length-1];
+  if(t >= L[2]) return [L[0], L[1]];
+  for(let i=0;i<kfs.length-1;i++){
+    const a = kfs[i], b = kfs[i+1];
+    if(t >= a[2] && t <= b[2]){
+      const d = b[2]-a[2];
+      let u = d > 0 ? (t-a[2])/d : 1;
+      if(!linear) u = u*u*(3-2*u);
+      return [a[0]+(b[0]-a[0])*u, a[1]+(b[1]-a[1])*u];
+    }
+  }
+  return [L[0], L[1]];
+}
+
+/* ============================================================
+   FLECHAS
+   ============================================================ */
+const ARROW_STYLE = {
+  ball:  {stroke:'#ffd23f', width:3,   dash:'',   marker:'arw0', opacity:.95},
+  ball2: {stroke:'#7dd3fc', width:2.5, dash:'',   marker:'arw3', opacity:.9},
+  run:   {stroke:'#8aa8d0', width:2.2, dash:'9 7', marker:'arw1', opacity:.65},
+  block: {stroke:'#ff8a3d', width:2.6, dash:'',   marker:'arw2', opacity:.9}
+};
+function arrowPath(a, b, curve){
+  const x1=X(a[0]), y1=Y(a[1]), x2=X(b[0]), y2=Y(b[1]);
+  if(!curve) return `M ${x1} ${y1} L ${x2} ${y2}`;
+  const mx=(x1+x2)/2, my=(y1+y2)/2;
+  const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||1;
+  const nx=-dy/len*curve*len, ny=dx/len*curve*len;
+  return `M ${x1} ${y1} Q ${mx+nx} ${my+ny} ${x2} ${y2}`;
+}
+
+/* ============================================================
+   TÁCTICAS BASE (las 17 originales) — dejo 5 de ejemplo
+   ============================================================ */
+const THEM_SR = {1:[1.8,2.0], 2:[1.8,7.8], 3:[4.5,7.8], 4:[7.2,7.8], 5:[7.2,2.0], 6:[4.5,1.3]};
+const THEM_AT = {1:[7.2,2.0], 2:[1.8,7.9], 3:[3.6,7.9], 4:[6.6,7.9], 5:[1.8,2.0], 6:[4.5,1.5]};
+
+const TACTICS = [
+{
+  id:'s1', cat:'Saque', name:'Saque flotante a zona 1',
+  sub:'Presionar al receptor de la banda derecha y sacarlo de su zona de ataque',
+  key:['1'], target:[0,0,3,3],
+  us:{1:[6.8,19.0],2:[7.2,10.2],3:[4.5,10.2],4:[1.8,10.2],5:[1.4,13.5],6:[4.5,14.5]},
+  them:THEM_SR,
+  ball:[[6.8,19.0,0],[1.8,2.4,1.5]],
+  arrows:[{a:[6.8,19.0],b:[1.8,2.4],kind:'ball',c:.35}],
+  phases:[[0,'Saque'],[1.5,'Recepción rival']],
+  notes:{
+    obj:'Sacar con dirección e intención al receptor de zona 1. La meta no es el ace, es <b>obligar al rival a atacar desde una posición incómoda</b>.',
+    roles:[
+      ['1','Sacador: golpe plano, sin rotación (flotante), desde el centro-derecha.'],
+      ['2','Opuesto: comunica la zona objetivo antes del saque.'],
+      ['3','Central: se ubica en el eje del bloqueo rival.'],
+      ['6','Líbero: lidera la defensa de saque.']
+    ],
+    keys:[
+      'Trayectoria <b>plana y sin rotación</b>.',
+      'Apuntá a 1–1,5 m del receptor, no al cuerpo.',
+      'Saque desde el centro-derecha para ampliar el ángulo.',
+      'Cargá la presión psicológica: si falla, insistí en la misma zona.'
+    ],
+    errs:[
+      'Sacar demasiado fuerte y salir largo.',
+      'Sacar al centro: el líbero la recibe fácil.',
+      'No comunicar la intención.'
+    ]
+  }
+},
+{
+  id:'s2', cat:'Saque', name:'Saque corto (zona 3-4)',
+  sub:'Romper la recepción obligando al rival a desplazarse hacia adelante',
+  key:['1'], target:[5.2,4.4,3.8,3.0],
+  us:{1:[1.6,19.0],2:[7.2,10.2],3:[4.5,10.2],4:[1.8,10.2],5:[1.4,13.5],6:[4.5,14.5]},
+  them:THEM_SR,
+  ball:[[1.6,19.0,0],[6.8,5.6,1.4]],
+  arrows:[{a:[1.6,19.0],b:[6.8,5.6],kind:'ball',c:-.35}],
+  phases:[[0,'Saque'],[1.4,'Recepción rival']],
+  notes:{
+    obj:'Colocar la bola corta entre las zonas 3 y 4 del rival. El objetivo es <b>generar duda sobre quién la toma</b>.',
+    roles:[
+      ['1','Sacador: bola suave, con mucha altura y caída rápida.'],
+      ['3','Central: se anticipa al ataque rápido si la recepción queda lejos.'],
+      ['6','Líbero: organiza la defensa de saque.']
+    ],
+    keys:[
+      'La bola debe caer <b>justo detrás de la línea de 3 m</b>.',
+      'Si el rival adelanta a un receptor, cambiá a zona 1 o 6.',
+      'Combiná con el saque profundo para que la duda sea constante.'
+    ],
+    errs:[
+      'Sacar corto con potencia.',
+      'Sacar corto a un equipo con receptor adelantado.',
+      'Repetir el mismo saque corto dos veces seguidas.'
+    ]
+  }
+},
+{
+  id:'s3', cat:'Saque', name:'Saque potente a zona 6',
+  sub:'Dividir a los receptores: buscar la duda "¿tuya o mía?"',
+  key:['1'], target:[3,0,3,3],
+  us:{1:[4.5,19.0],2:[7.2,10.2],3:[4.5,10.2],4:[1.8,10.2],5:[1.4,13.5],6:[4.5,14.5]},
+  them:THEM_SR,
+  ball:[[4.5,19.0,0],[4.5,2.6,1.15]],
+  arrows:[{a:[4.5,19.0],b:[4.5,2.6],kind:'ball',c:0}],
+  phases:[[0,'Saque'],[1.2,'Recepción rival']],
+  notes:{
+    obj:'Atacar el punto exacto donde se juntan dos receptores. La bola profunda en zona 6 <b>divide responsabilidades</b>.',
+    roles:[
+      ['1','Sacador: potencia controlada, con ligera caída al final.'],
+      ['2','Opuesto: abre el bloqueo hacia la banda.'],
+      ['3','Central: preparado para el ataque rápido.']
+    ],
+    keys:[
+      'Caer <b>en la línea que divide los carriles</b>.',
+      'Cuanto más profunda, más tarda el armador rival.',
+      'Después del saque, todo el equipo entra rápido al bloqueo.'
+    ],
+    errs:[
+      'Sacar al centro exacto de un carril.',
+      'Sacar sin altura suficiente.',
+      'Olvidar el bloqueo tras el saque.'
+    ]
+  }
+},
+{
+  id:'r1', cat:'Recepción', name:'Recepción en W (3 receptores)',
+  sub:'Formación base para cubrir el mayor espacio y liberar a los atacantes de red',
+  key:['6'], target:null,
+  us:{1:[7.6,13.0],2:[7.6,10.0],3:[4.5,10.0],4:[1.8,10.0],5:[1.4,13.0],6:[4.5,15.0]},
+  them:{1:[7.2,2.0],2:[7.2,7.8],3:[4.5,7.8],4:[1.8,7.8],5:[1.8,2.0],6:[4.5,1.5]},
+  ball:[[1.8,-0.5,0],[4.5,15.0,1.5],[6.9,10.2,2.6]],
+  moves:{2:[[7.6,10.0,1.5],[6.9,10.2,2.6]]},
+  arrows:[
+    {a:[1.8,-0.5],b:[4.5,15.0],kind:'ball',c:.4},
+    {a:[4.5,15.0],b:[6.9,10.2],kind:'ball2',c:-.35},
+    {a:[4.5,15.0],b:[6.9,10.2],kind:'run',c:-.35,dash:true}
+  ],
+  phases:[[0,'Saque rival'],[1.5,'Recepción'],[2.6,'Colocación']],
+  notes:{
+    obj:'Cubrir los 9 m de ancho con <b>tres receptores especialistas</b> y liberar a los atacantes de red.',
+    roles:[
+      ['1','Receptor derecho: banda hasta mitad de zona 6.'],
+      ['5','Receptor izquierdo: espejo del 1.'],
+      ['6','Líbero: ancla el centro profundo.'],
+      ['3','Central: a 1-2 m de la red. No recibe.'],
+      ['4','Punta: a la red, preparado para zona 4.'],
+      ['2','Colocador: en la red derecha, esperando.']
+    ],
+    keys:[
+      'Los tres forman una <b>"W"</b>: laterales a 4-5 m, central más profundo.',
+      '<b>Cada uno es responsable de su carril</b>.',
+      'Comunicación obligatoria: "¡Yo!", "¡Tú!", "¡Libre!".',
+      'La recepción debe llegar a 1-1,5 m de la red entre zonas 2 y 3.'
+    ],
+    errs:[
+      'Dos jugadores yendo a la misma bola.',
+      'El central invadiendo el carril del lateral.',
+      'Recepcionar demasiado cerca de la red.',
+      'No comunicar.'
+    ]
+  }
+},
+{
+  id:'r2', cat:'Recepción', name:'Recepción con 2 receptores',
+  sub:'Liberar cuatro atacantes y concentrar la responsabilidad en los dos mejores',
+  key:['1','5'], target:null,
+  us:{1:[7.2,13.5],2:[7.4,10.0],3:[4.5,10.0],4:[1.8,10.0],5:[1.8,13.5],6:[4.5,11.5]},
+  them:{1:[7.2,2.0],2:[7.2,7.8],3:[4.5,7.8],4:[1.8,7.8],5:[1.8,2.0],6:[4.5,1.5]},
+  ball:[[4.5,-0.5,0],[2.0,13.8,1.5],[6.9,10.2,2.6]],
+  moves:{6:[[4.5,11.5,0],[4.5,12.2,2.6]]},
+  arrows:[
+    {a:[4.5,-0.5],b:[2.0,13.8],kind:'ball',c:.35},
+    {a:[2.0,13.8],b:[6.9,10.2],kind:'ball2',c:-.3}
+  ],
+  phases:[[0,'Saque rival'],[1.5,'Recepción'],[2.6,'Colocación']],
+  notes:{
+    obj:'Reducir la recepción a <b>dos especialistas</b> para liberar al líbero, al opuesto y al central hacia el ataque.',
+    roles:[
+      ['1','Receptor derecho: banda derecha hasta el centro.'],
+      ['5','Receptor izquierdo: banda izquierda y centro.'],
+      ['6','Líbero: se libera para llegar al pipe.'],
+      ['3','Central: a la red, dispuesto para el rápido.'],
+      ['4','Punta: a la red, listo para zona 4.'],
+      ['2','Colocador: en la red derecha.']
+    ],
+    keys:[
+      'Reparto <b>por mitades</b>: regla rígida.',
+      'El receptor que no recibe arranca su aproximación de ataque.',
+      'El líbero liberado debe llegar al zaguero <b>antes</b> del armado.'
+    ],
+    errs:[
+      'Quedar en la mitad equivocada.',
+      'Líbero mirando la recepción sin arrancar.',
+      'Usar contra sacadores muy potentes: la recepción se rompe.'
+    ]
+  }
+},
+{
+  id:'r3', cat:'Recepción', name:'Recepción del saque corto',
+  sub:'Salir a buscarla, nunca esperarla: la bola corta se ataca, no se espera',
+  key:['5','4'], target:null,
+  us:{1:[7.6,13.5],2:[7.6,10.0],3:[4.5,10.0],4:[1.8,10.0],5:[1.4,13.5],6:[4.5,15.0]},
+  them:{1:[7.2,2.0],2:[7.2,7.8],3:[4.5,7.8],4:[1.8,7.8],5:[1.8,2.0],6:[4.5,1.5]},
+  ball:[[1.8,-0.5,0],[2.8,12.2,1.3],[6.9,10.2,2.5]],
+  moves:{
+    5:[[1.4,13.5,0],[2.8,12.3,1.2],[2.6,12.7,1.9]],
+    4:[[1.8,10.0,0],[1.4,11.8,1.3]],
+    1:[[7.6,13.5,0],[6.4,14.0,1.3]],
+    6:[[4.5,15.0,0],[3.9,14.2,1.3]]
+  },
+  arrows:[
+    {a:[1.8,-0.5],b:[2.8,12.2],kind:'ball',c:.3},
+    {a:[2.8,12.2],b:[6.9,10.2],kind:'ball2',c:-.3}
+  ],
+  phases:[[0,'Saque corto'],[1.2,'Ajuste defensivo'],[2.4,'Colocación']],
+  notes:{
+    obj:'Reconocer el saque corto y <b>atacarlo saliendo a su encuentro</b>.',
+    roles:[
+      ['5','Receptor más cercano: sale decidido hacia adelante.'],
+      ['4','Punta de red: retrocede para cubrir el hueco.'],
+      ['1','Receptor derecho: se desplaza al centro.'],
+      ['6','Líbero: cierra el fondo.'],
+      ['2','Colocador: ajusta su posición.']
+    ],
+    keys:[
+      'La bola corta <b>se ataca saliendo</b>: peso adelante, contacto por delante del cuerpo.',
+      'El receptor que sale deja un hueco: los compañeros rotan.',
+      'Aprovechala para el rápido.'
+    ],
+    errs:[
+      'Esperar la bola con los brazos bajos.',
+      'Ir de espaldas hacia la bola.',
+      'Nadie cubre el hueco.'
+    ]
+  }
+},
+{
+  id:'a1', cat:'Ataque', name:'Balón 4 · Ataque por zona 4',
+  sub:'La jugada más rentable: ángulo amplio, alto porcentaje y bloqueo previsible',
+  key:['4'], target:null,
+  us:{1:[7.6,12.5],2:[6.9,10.2],3:[4.5,10.3],4:[1.8,10.2],5:[1.4,13.8],6:[4.5,14.8]},
+  them:THEM_AT,
+  ball:[[4.5,-0.5,0],[1.4,13.8,1.4],[6.9,10.2,2.4],[1.7,9.9,3.5],[2.8,5.2,4.1]],
+  moves:{
+    4:[[1.8,10.2,0],[0.9,12.4,2.2],[1.7,10.1,3.5]],
+    3:[[4.5,10.3,0],[4.0,11.4,2.2],[4.5,10.2,2.8]]
+  },
+  arrows:[
+    {a:[1.4,13.8],b:[6.9,10.2],kind:'ball',c:-.3},
+    {a:[6.9,10.2],b:[1.7,9.9],kind:'ball',c:-.35},
+    {a:[1.7,9.9],b:[2.8,5.2],kind:'ball',c:.25},
+    {a:[1.8,10.2],b:[0.9,12.4],kind:'run',c:-.5,dash:true}
+  ],
+  phases:[[0,'Saque rival'],[1.4,'Recepción'],[2.4,'Colocación'],[3.5,'Ataque']],
+  notes:{
+    obj:'Atacar por la banda izquierda aprovechando el <b>ángulo más amplio</b>.',
+    roles:[
+      ['5','Responsable de la recepción.'],
+      ['2','Colocador: set alto a 50-80 cm de la red.'],
+      ['4','Atacante: aproximación en 3 pasos, salto vertical.'],
+      ['3','Central: corre el rápido como señuelo.']
+    ],
+    keys:[
+      'La <b>aproximación en 3 pasos</b> es sagrada.',
+      'Llegá al punto de contacto <b>antes</b> que la bola.',
+      'Atacá contra las manos o buscá la línea.',
+      'El central DEBE correr el rápido aunque no reciba.'
+    ],
+    errs:[
+      'Colocación demasiado pegada a la red.',
+      'Aproximación lenta.',
+      'Atacar siempre al mismo lugar.'
+    ]
+  }
+},
+{
+  id:'a2', cat:'Ataque', name:'Balón 3 · Rápido por el centro',
+  sub:'El ataque más rápido del voleibol: depende 100% de la sincronía colocador-central',
+  key:['3'], target:null,
+  us:{1:[7.6,12.5],2:[6.9,10.2],3:[4.5,10.3],4:[1.8,10.2],5:[1.4,13.8],6:[4.5,14.8]},
+  them:THEM_AT,
+  ball:[[4.5,-0.5,0],[4.5,14.8,1.4],[6.9,10.2,2.4],[4.4,9.9,3.3],[4.6,5.0,3.9]],
+  moves:{
+    3:[[4.5,10.3,0],[3.5,11.6,2.1],[4.4,10.0,3.3]],
+    4:[[1.8,10.2,0],[1.2,12.0,2.1],[1.9,10.4,3.0]]
+  },
+  arrows:[
+    {a:[6.9,10.2],b:[4.4,9.9],kind:'ball',c:-.3},
+    {a:[4.4,9.9],b:[4.6,5.0],kind:'ball',c:0},
+    {a:[4.5,10.3],b:[3.5,11.6],kind:'run',c:.5,dash:true}
+  ],
+  phases:[[0,'Saque rival'],[1.4,'Recepción'],[2.4,'Colocación'],[3.3,'Ataque']],
+  notes:{
+    obj:'Atacar con la bola <b>antes de que el bloqueo rival se organice</b>.',
+    roles:[
+      ['2','Colocador: lanza al mismo tiempo que el central despega.'],
+      ['3','Central: 2-3 pasos, salta, golpea a 1 m del colocador.'],
+      ['4','Punta y opuesto: corren sus aproximaciones como señuelos.'],
+      ['5','Receptor: pase perfecto a la zona 2-3.']
+    ],
+    keys:[
+      '<b>El timing es todo</b>.',
+      'El atacante debe llegar con el brazo ya cargado.',
+      'Pase perfecto o no hay rápido.',
+      'El rápido fija al central rival.'
+    ],
+    errs:[
+      'Central que sale antes de tiempo.',
+      'Colocador que lanza tarde.',
+      'Insistir con el rápido tras dos recepciones malas.'
+    ]
+  }
+},
+{
+  id:'a3', cat:'Ataque', name:'Pipe · Ataque de zaguero por zona 6',
+  sub:'Un cuarto atacante desde atrás: el arma más subestimada del voleibol moderno',
+  key:['6'], target:null,
+  us:{1:[7.6,13.0],2:[6.9,10.2],3:[4.5,10.3],4:[1.8,10.2],5:[1.4,13.5],6:[4.5,15.0]},
+  them:THEM_AT,
+  ball:[[4.5,-0.5,0],[1.4,13.5,1.4],[6.9,10.2,2.4],[4.5,12.4,3.4],[4.2,5.2,4.0]],
+  moves:{
+    6:[[4.5,15.0,0],[4.5,13.2,2.2],[4.5,12.4,3.4]],
+    3:[[4.5,10.3,0],[3.9,11.4,2.2],[4.4,10.2,3.0]],
+    4:[[1.8,10.2,0],[1.0,12.2,2.2],[1.8,10.3,3.2]]
+  },
+  arrows:[
+    {a:[6.9,10.2],b:[4.5,12.4],kind:'ball',c:.3},
+    {a:[4.5,12.4],b:[4.2,5.2],kind:'ball',c:0},
+    {a:[4.5,15.0],b:[4.5,12.4],kind:'run',c:-.5,dash:true}
+  ],
+  phases:[[0,'Saque rival'],[1.4,'Recepción'],[2.4,'Colocación'],[3.4,'Ataque de zaguero']],
+  notes:{
+    obj:'Atacar desde la <b>zona 6 con un jugador de zaguero</b>.',
+    roles:[
+      ['6','Atacante de zaguero: salta detrás de la línea de 3 m.'],
+      ['2','Colocador: set tenso a 1,5-2 m de la red.'],
+      ['3','Central: corre el rápido para arrastrar al central rival.'],
+      ['4','Punta: su aproximación fija al bloqueador exterior derecho.']
+    ],
+    keys:[
+      'El atacante <b>debe saltar detrás de la línea de 3 m</b>.',
+      'Bola tensa: si es alta, la defensa lee.',
+      'Atacá entre el bloqueo central y el exterior.'
+    ],
+    errs:[
+      'Saltar pisando la línea.',
+      'Colocación demasiado alta.',
+      'Usar el pipe como ataque principal.'
+    ]
+  }
+},
+{
+  id:'a4', cat:'Ataque', name:'Combinación · Cruce (X)',
+  sub:'Dos atacantes en el mismo espacio-tiempo: el bloqueo no puede cubrir a los dos',
+  key:['3','4'], target:null,
+  us:{1:[7.6,12.5],2:[6.9,10.2],3:[4.5,10.3],4:[1.8,10.2],5:[1.4,13.8],6:[4.5,14.8]},
+  them:THEM_AT,
+  ball:[[4.5,-0.5,0],[1.4,13.8,1.4],[6.9,10.2,2.4],[4.3,9.9,3.4],[4.8,5.2,4.0]],
+  moves:{
+    3:[[4.5,10.3,0],[3.9,11.5,2.2],[4.3,10.0,3.4]],
+    4:[[1.8,10.2,0],[1.0,12.2,2.0],[5.2,10.0,3.6]]
+  },
+  arrows:[
+    {a:[6.9,10.2],b:[4.3,9.9],kind:'ball',c:-.3},
+    {a:[4.3,9.9],b:[4.8,5.2],kind:'ball',c:0},
+    {a:[1.8,10.2],b:[5.2,10.0],kind:'run',c:.6,dash:true},
+    {a:[6.9,10.2],b:[1.9,10.0],kind:'ball2',c:-.4,dash:true}
+  ],
+  phases:[[0,'Saque rival'],[1.4,'Recepción'],[2.4,'Combinación'],[3.5,'Ataque']],
+  notes:{
+    obj:'Forzar al bloqueo rival a elegir entre dos atacantes que llegan <b>al mismo tiempo y al mismo espacio</b>.',
+    roles:[
+      ['2','Colocador: debe tener DOS opciones reales.'],
+      ['3','Central: corre el rápido por delante del colocador.'],
+      ['4','Punta: sale de la banda izquierda y cruza por detrás del central.'],
+      ['5','Receptor: pase perfecto a zona 2-3.']
+    ],
+    keys:[
+      'El <b>cruce es visual</b>: los dos atacantes en el aire casi al mismo tiempo.',
+      'El colocador lee al central rival.',
+      'Las trayectorias NO deben chocar.'
+    ],
+    errs:[
+      'Los dos atacantes llegan desfasados.',
+      'El punta cruza por delante del central.',
+      'Usar con recepción mala.'
+    ]
+  }
+},
+{
+  id:'b1', cat:'Bloqueo', name:'Bloqueo de 2 + defensa',
+  sub:'Cerrar el ataque por zona 4 rival y defender según la dirección del bloqueo',
+  key:['2','3'], target:null,
+  us:{1:[7.8,13.5],2:[7.2,10.0],3:[4.5,10.0],4:[1.8,10.0],5:[1.4,13.5],6:[4.5,15.0]},
+  them:{1:[7.2,2.0],2:[1.8,7.9],3:[3.6,7.9],4:[6.6,7.9],5:[1.8,2.0],6:[4.5,1.5]},
+  ball:[[4.5,7.5,0],[7.2,7.2,0.7],[6.2,9.6,1.2],[5.0,12.8,2.0],[5.4,14.8,2.4]],
+  moves:{
+    2:[[7.2,10.0,0],[6.6,9.5,1.1]],
+    3:[[4.5,10.0,0],[5.6,9.5,1.1]],
+    4:[[1.8,10.0,0],[2.0,11.8,1.4]],
+    1:[[7.8,13.5,0],[7.9,14.6,1.4]],
+    6:[[4.5,15.0,0],[5.4,15.2,1.4]],
+    5:[[1.4,13.5,0],[2.2,14.0,1.4]]
+  },
+  arrows:[
+    {a:[4.5,7.5],b:[7.2,7.2],kind:'ball',c:-.3},
+    {a:[7.2,7.2],b:[6.2,9.6],kind:'ball',c:0},
+    {a:[6.2,9.6],b:[5.4,14.8],kind:'ball',c:.2},
+    {a:[7.2,10.0],b:[6.6,9.5],kind:'run',c:0,dash:true},
+    {a:[4.5,10.0],b:[5.6,9.5],kind:'run',c:0,dash:true}
+  ],
+  phases:[[0,'Ataque rival'],[1.1,'Bloqueo'],[2.4,'Defensa']],
+  notes:{
+    obj:'Formar un bloqueo de dos jugadores que <b>cierre el ataque rival por zona 4</b> y organizar la defensa.',
+    roles:[
+      ['2','Bloqueador exterior: marca el hombro del brazo de ataque.'],
+      ['3','Bloqueador central: cierra el hueco. Manos juntas.'],
+      ['1','Defensor derecho: detrás del bloqueo.'],
+      ['6','Líbero: defiende la diagonal profunda.'],
+      ['4','Punta de red: cubre el tip.'],
+      ['5','Defensor izquierdo: cierra la esquina profunda.']
+    ],
+    keys:[
+      'Bloqueo y defensa <b>se coordinan antes</b>.',
+      'Las manos penetran la red.',
+      'Dedos firmes y separados.',
+      'Defensor a 3-4 m de las manos del bloqueador.'
+    ],
+    errs:[
+      'Hueco entre los bloqueadores.',
+      'Bloqueo blando.',
+      'Defensas mirando la bola.',
+      'Todos defendiendo la misma zona.'
+    ]
+  }
+},
+{
+  id:'b2', cat:'Bloqueo', name:'Bloqueo de 3 (lectura)',
+  sub:'Cerrar completamente la red: máxima agresividad, máxima exigencia física',
+  key:['2','3','4'], target:null,
+  us:{1:[7.8,13.5],2:[7.2,10.0],3:[4.5,10.0],4:[1.8,10.0],5:[1.4,13.5],6:[4.5,15.0]},
+  them:{1:[7.2,2.0],2:[1.8,7.9],3:[3.6,7.9],4:[6.6,7.9],5:[1.8,2.0],6:[4.5,1.5]},
+  ball:[[4.5,7.5,0],[7.2,7.2,0.7],[6.4,9.5,1.2],[4.8,12.0,2.0]],
+  moves:{
+    2:[[7.2,10.0,0],[6.9,9.5,1.2]],
+    3:[[4.5,10.0,0],[5.9,9.5,1.2]],
+    4:[[1.8,10.0,0],[4.9,9.5,1.4]],
+    1:[[7.8,13.5,0],[7.9,14.4,1.4]],
+    6:[[4.5,15.0,0],[4.8,15.4,1.4]],
+    5:[[1.4,13.5,0],[1.8,14.2,1.4]]
+  },
+  arrows:[
+    {a:[7.2,10.0],b:[6.9,9.5],kind:'run',c:0,dash:true},
+    {a:[4.5,10.0],b:[5.9,9.5],kind:'run',c:0,dash:true},
+    {a:[1.8,10.0],b:[4.9,9.5],kind:'run',c:-.35,dash:true},
+    {a:[7.2,7.2],b:[6.4,9.5],kind:'ball',c:0}
+  ],
+  phases:[[0,'Lectura'],[1.2,'Cierre del bloqueo']],
+  notes:{
+    obj:'Cerrar la red con <b>tres bloqueadores</b> cuando la lectura es clara.',
+    roles:[
+      ['2','Bloqueador derecho: marca el brazo fuerte.'],
+      ['3','Bloqueador central: cierra el hueco.'],
+      ['4','Bloqueador izquierdo: cruza toda la red.'],
+      ['6','Líbero: solo en la defensa de fondo.'],
+      ['1','Defensor derecho: línea profunda y bloqueo-out.']
+    ],
+    keys:[
+      'Solo si el armador rival ya mostró el destino.',
+      'Los tres deben juntar los brazos.',
+      'El que cruza llega con los pies bien ubicados.'
+    ],
+    errs:[
+      'Bloquear de 3 por sistema.',
+      'Saltar sin cerrar.',
+      'No comunicar la lectura.'
+    ]
+  }
+},
+{
+  id:'b3', cat:'Bloqueo', name:'Bloqueo de 1 + defensa perimetral',
+  sub:'Máxima protección del fondo: el bloqueador elige una dirección y la defensa cierra el resto',
+  key:['2'], target:null,
+  us:{1:[7.8,13.5],2:[7.2,10.0],3:[4.5,10.0],4:[1.8,10.0],5:[1.4,13.5],6:[4.5,15.0]},
+  them:{1:[7.2,2.0],2:[1.8,7.9],3:[3.6,7.9],4:[6.6,7.9],5:[1.8,2.0],6:[4.5,1.5]},
+  ball:[[4.5,7.5,0],[7.0,7.2,0.7],[6.4,9.5,1.1],[6.0,13.5,1.9],[8.0,14.8,2.5]],
+  moves:{
+    2:[[7.2,10.0,0],[6.6,9.5,1.1]],
+    3:[[4.5,10.0,0],[3.6,11.5,1.4]],
+    4:[[1.8,10.0,0],[2.0,11.8,1.4]],
+    1:[[7.8,13.5,0],[8.0,14.8,1.4]],
+    6:[[4.5,15.0,0],[4.6,15.8,1.4]],
+    5:[[1.4,13.5,0],[1.2,14.8,1.4]]
+  },
+  arrows:[
+    {a:[7.0,7.2],b:[6.4,9.5],kind:'ball',c:0},
+    {a:[6.4,9.5],b:[8.0,14.8],kind:'ball',c:.3},
+    {a:[7.2,10.0],b:[6.6,9.5],kind:'run',c:0,dash:true}
+  ],
+  phases:[[0,'Ataque rival'],[1.1,'Bloqueo individual'],[1.9,'Defensa perimetral']],
+  notes:{
+    obj:'Con un solo bloqueador, el equipo renuncia a cerrar la red y <b>prioriza la defensa del fondo</b>.',
+    roles:[
+      ['2','Bloqueador único: elige LÍNEA o DIAGONAL.'],
+      ['1','Defensor derecho: cubre la diagonal profunda.'],
+      ['6','Líbero: cubre el centro profundo.'],
+      ['5','Defensor izquierdo: cubre la esquina profunda.'],
+      ['4','Punta: se retira al corto.'],
+      ['3','Central: se retira al corto contrario.']
+    ],
+    keys:[
+      'Todos los defensores en el <b>perímetro</b>.',
+      'El bloqueador <b>siempre comunica</b> qué cubre.',
+      'Ideal contra atacantes de gran potencia.'
+    ],
+    errs:[
+      'Bloqueador que no comunica.',
+      'Defensas ubicados en el centro.',
+      'Mirar el bloqueo en lugar de la bola.'
+    ]
+  }
+},
+{
+  id:'d1', cat:'Defensa', name:'Defensa del ataque de zaguero',
+  sub:'Cuando el rival ataca desde atrás, la defensa retrocede y el bloqueo se estrecha',
+  key:['6','1'], target:null,
+  us:{1:[7.8,13.0],2:[7.2,10.0],3:[4.5,10.0],4:[1.8,10.0],5:[1.4,13.5],6:[4.5,14.0]},
+  them:{1:[7.2,2.0],2:[1.8,7.9],3:[3.6,7.9],4:[6.6,7.9],5:[1.8,2.0],6:[4.5,2.5]},
+  ball:[[4.5,2.5,0],[4.5,7.5,0.6],[4.5,12.5,1.4],[4.6,16.0,2.2]],
+  moves:{
+    1:[[7.8,13.0,0],[7.9,14.5,1.5]],
+    5:[[1.4,13.5,0],[1.3,14.5,1.5]],
+    6:[[4.5,14.0,0],[4.5,16.0,1.5]],
+    2:[[7.2,10.0,0],[5.9,9.5,1.5]],
+    3:[[4.5,10.0,0],[4.9,9.5,1.5]],
+    4:[[1.8,10.0,0],[2.2,11.5,1.5]]
+  },
+  arrows:[
+    {a:[4.5,2.5],b:[4.5,7.5],kind:'ball',c:0},
+    {a:[4.5,7.5],b:[4.5,12.5],kind:'ball',c:0},
+    {a:[4.5,12.5],b:[4.6,16.0],kind:'ball',c:0},
+    {a:[4.5,14.0],b:[4.5,16.0],kind:'run',c:.4,dash:true}
+  ],
+  phases:[[0,'Ataque de zaguero'],[1.5,'Ajuste defensivo'],[2.2,'Defensa']],
+  notes:{
+    obj:'Reconocer que el rival ataca desde la <b>zona 6</b>. La defensa retrocede 1-2 m.',
+    roles:[
+      ['6','Líbero: retrocede al fondo a 6-7 m.'],
+      ['1','Defensor derecho: cierra la esquina profunda.'],
+      ['5','Defensor izquierdo: cierra la esquina profunda.'],
+      ['2','Bloqueador exterior: se desplaza al centro.'],
+      ['3','Bloqueador central: cierra el bloqueo.'],
+      ['4','Punta: se retira al corto.']
+    ],
+    keys:[
+      'El ataque de zaguero <b>llega más lejos</b>.',
+      'El bloqueo se estrecha.',
+      'Defensor del centro a 6-7 m de la red.',
+      'Leé si salta detrás de la línea de 3 m.'
+    ],
+    errs:[
+      'Defensa adelantada.',
+      'Bloqueo abierto en la banda.',
+      'No identificar el ataque a tiempo.'
+    ]
+  }
+},
+{
+  id:'t1', cat:'Transición', name:'Contraataque: defensa → ataque',
+  sub:'La jugada más rentable del voleibol: defender primero, atacar después',
+  key:['1','4'], target:null,
+  us:{1:[7.8,14.5],2:[6.9,10.0],3:[4.5,10.0],4:[1.8,10.0],5:[1.4,13.5],6:[4.5,15.0]},
+  them:{1:[7.2,2.0],2:[1.8,7.9],3:[3.6,7.9],4:[6.6,7.9],5:[1.8,2.0],6:[4.5,1.5]},
+  ball:[[7.0,7.5,0],[6.2,9.5,0.9],[6.6,13.8,1.8],[6.9,10.2,2.6],[1.8,10.0,3.5],[2.6,5.0,4.1]],
+  moves:{
+    1:[[7.8,14.5,0],[6.5,14.0,1.0],[7.2,14.2,2.0]],
+    2:[[6.9,10.0,0],[6.5,10.6,1.4],[6.9,10.2,2.6]],
+    4:[[1.8,10.0,0],[1.0,12.3,1.6],[1.8,10.2,2.9],[2.6,5.5,3.7]],
+    3:[[4.5,10.0,0],[4.2,11.4,1.6],[4.5,10.2,2.6]],
+    6:[[4.5,15.0,0],[5.2,15.2,1.6]]
+  },
+  arrows:[
+    {a:[7.0,7.5],b:[6.2,9.5],kind:'ball',c:0},
+    {a:[6.2,9.5],b:[6.5,14.0],kind:'ball',c:.25},
+    {a:[6.5,14.0],b:[6.9,10.2],kind:'ball',c:-.3},
+    {a:[6.9,10.2],b:[1.8,10.0],kind:'ball',c:-.35},
+    {a:[1.8,10.0],b:[2.6,5.5],kind:'ball',c:.25},
+    {a:[1.8,10.0],b:[1.0,12.3],kind:'run',c:-.5,dash:true}
+  ],
+  phases:[[0,'Bloqueo'],[1.0,'Defensa'],[1.8,'Pase al armador'],[2.6,'Colocación'],[3.5,'Contraataque']],
+  notes:{
+    obj:'Convertir una <b>defensa en un ataque ganador</b>.',
+    roles:[
+      ['1','Defensor: controla la bola y la dirige al colocador.'],
+      ['2','Colocador: corre desde donde esté hasta la red.'],
+      ['4','Atacante: primero defiende, después ataca.'],
+      ['3','Central: corre el rápido.'],
+      ['6','Líbero: cubre el fondo.']
+    ],
+    keys:[
+      'Secuencia: <b>defensa → pase → colocación → ataque</b>.',
+      'El defensa <b>dirige la bola al colocador</b>.',
+      'El colocador arranca en cuanto la bola cruza la red.',
+      'El que defiende es el que ataca.'
+    ],
+    errs:[
+      'Defensas que se quedan mirando.',
+      'Colocador que no corre.',
+      'Atacantes que salen demasiado pronto.'
+    ]
+  }
+},
+{
+  id:'t2', cat:'Transición', name:'Cobertura de ataque',
+  sub:'Proteger a tu atacante: el bloqueo rival devuelve la bola y hay que estar ahí',
+  key:['5','6'], target:null,
+  us:{1:[7.6,13.0],2:[6.9,10.2],3:[4.5,10.3],4:[1.8,10.2],5:[1.4,13.5],6:[4.5,14.5]},
+  them:{1:[7.2,2.0],2:[1.8,7.9],3:[3.6,7.9],4:[6.6,7.9],5:[1.8,2.0],6:[4.5,1.5]},
+  ball:[[6.9,10.2,0],[1.7,10.0,1.1],[1.9,9.6,1.5],[2.6,12.2,2.2],[3.4,12.8,2.8]],
+  moves:{
+    5:[[1.4,13.5,0],[2.6,12.3,1.2]],
+    6:[[4.5,14.5,0],[4.5,12.9,1.2]],
+    1:[[7.6,13.0,0],[6.8,12.1,1.2]],
+    3:[[4.5,10.3,0],[4.6,10.9,1.2]],
+    2:[[6.9,10.2,0],[6.8,11.0,1.2]],
+    4:[[1.8,10.2,0],[0.9,12.2,1.0],[1.7,10.1,2.0]]
+  },
+  arrows:[
+    {a:[6.9,10.2],b:[1.7,10.0],kind:'ball',c:-.35},
+    {a:[1.7,10.0],b:[1.9,9.6],kind:'ball',c:0},
+    {a:[1.9,9.6],b:[3.4,12.8],kind:'ball',c:.2},
+    {a:[1.8,10.2],b:[0.9,12.2],kind:'run',c:-.5,dash:true}
+  ],
+  phases:[[0,'Colocación'],[1.0,'Ataque'],[1.6,'Bloqueo rival'],[2.2,'Cobertura']],
+  notes:{
+    obj:'Formar un <b>semicírculo protector alrededor del atacante</b> para recuperar la bola.',
+    roles:[
+      ['5','Cobertura lateral izquierda.'],
+      ['6','Cobertura central: el más importante.'],
+      ['1','Cobertura lateral derecha.'],
+      ['3','Central: cerca de la red, cubre el bloqueo-out corto.'],
+      ['2','Colocador: detrás del atacante.']
+    ],
+    keys:[
+      'Semicírculo a 3-4 m del atacante.',
+      'Cubrir tres zonas: corto, profundo y detrás.',
+      'Brazos abajo y adelante.',
+      'La cobertura se arma <b>antes</b> del golpe.'
+    ],
+    errs:[
+      'Cobertura tardía.',
+      'Todos en el mismo lugar.',
+      'No cubrir el bloqueo-out profundo.'
+    ]
+  }
+},
+{
+  id:'sis1', cat:'Sistemas', name:'Sistema 5-1 · Posiciones base',
+  sub:'Un solo colocador, seis rotaciones, roles perfectamente definidos',
+  key:['1','2','3','4','5','6'], target:null,
+  us:{1:[7.8,14.5],2:[7.2,10.2],3:[4.5,10.2],4:[1.8,10.2],5:[1.2,14.5],6:[4.5,15.5]},
+  them:null,
+  ball:null,
+  moves:null,
+  arrows:[],
+  phases:[[0,'Sistema 5-1']],
+  notes:{
+    obj:'El <b>5-1</b> es el sistema de alto rendimiento por excelencia: <b>un solo colocador</b> que rota por las seis posiciones.',
+    roles:[
+      ['1','Colocador (S): rota por las 6 posiciones. Penetra a la red desde zaguero.'],
+      ['2','Opuesto (OP): diagonal del colocador.'],
+      ['3','Central (MB): ataca el rápido por zona 3.'],
+      ['4','Punta receptor (OH): ataca por zona 4 y recibe saque.'],
+      ['5','Punta receptor 2 (OH): el otro punta.'],
+      ['6','Líbero (L): no ataca, no saca, no bloquea.']
+    ],
+    keys:[
+      'Colocador y opuesto son <b>diagonales</b>.',
+      'Los dos centrales son <b>diagonales</b>.',
+      'El colocador de zaguero <b>penetra a la red</b> después del saque.',
+      'El líbero entra por un central de zaguero.',
+      'Siempre hay <b>tres atacantes delanteros</b>.'
+    ],
+    errs:[
+      'Confundir la rotación.',
+      'Colocador de zaguero que no penetra.',
+      'No respetar la diagonal opuesto-colocador.'
+    ]
+  }
+}
+];
+
+/* ============================================================
+   CARGA DE TÁCTICA PREDEFINIDA
+   ============================================================ */
+function loadTactic(tac){
+  if(!tac) return;
+  freeMode = false;
+  cur = tac;
+  currentSavedId = null;
+  buildCourt();
+
+  document.getElementById('tacName').textContent = tac.name;
+  document.getElementById('tacSub').textContent  = tac.sub || '';
+
+  const pill = document.getElementById('phasePill');
+  pill.classList.remove('free','saved');
+  pill.style.display = tac.phases ? 'inline-block' : 'none';
+
+  clearTacticLayers();
+  clearNode(getLayer('drawLayer'));
+
+  if(tac.target){
+    const tl = getLayer('targetLayer');
+    if(tl){
+      const [x,y,w,h] = tac.target;
+      tl.appendChild(el('rect', {x:X(x), y:Y(y), width:w*S, height:h*S, rx:6, class:'target-zone'}));
+    }
+  }
+
+  const al = getLayer('arrowLayer');
+  if(al){
+    (tac.arrows||[]).forEach(a=>{
+      const st = ARROW_STYLE[a.kind] || ARROW_STYLE.run;
+      const p = el('path', {
+        d: arrowPath(a.a, a.b, a.c || 0),
+        fill:'none', stroke: st.stroke, 'stroke-width': st.width,
+        'stroke-dasharray': st.dash, 'stroke-linecap':'round',
+        'marker-end':'url(#'+st.marker+')', opacity: st.opacity
+      });
+      al.appendChild(p);
+    });
+  }
+
+  els = {us:{}, them:{}, ball:null};
+  const pl = getLayer('playerLayer');
+  if(pl){
+    ['us','them'].forEach(side=>{
+      const src = tac[side];
+      if(!src) return;
+      Object.keys(src).forEach(n=>{
+        const isKey = (tac.key||[]).includes(n) && side==='us';
+        const g = el('g', {class:'player '+side+(isKey?' key':'')});
+        g.appendChild(el('circle', {r:15}));
+        const tx = el('text');
+        tx.textContent = n; g.appendChild(tx);
+        const pos = src[n];
+        g.setAttribute('transform', `translate(${X(pos[0])},${Y(pos[1])})`);
+        pl.appendChild(g);
+        els[side][n] = g;
+      });
+    });
+  }
+
+  if(tac.ball && tac.ball.length){
+    const bl = getLayer('ballLayer');
+    if(bl){
+      const b = el('g', {class:'ball'});
+      b.appendChild(el('circle', {r:8, fill:'#ffd23f'}));
+      b.appendChild(el('circle', {r:8, fill:'none', stroke:'#fff', 'stroke-width':'1.8', opacity:'.65'}));
+      bl.appendChild(b);
+      els.ball = b;
+    }
+  }
+
+  let d = 0;
+  (tac.ball||[]).forEach(k=>d=Math.max(d,k[2]));
+  if(tac.moves) Object.values(tac.moves).forEach(kfs=>kfs.forEach(k=>d=Math.max(d,k[2])));
+  dur = Math.max(0.8, d + 0.9);
+
+  tNow = 0; playing = false;
+  updatePlayBtn();
+  render();
+  renderTacticNotes(tac);
+}
+
+/* ============================================================
+   CARGA DE TÁCTICA GUARDADA (pizarra libre con strokes)
+   ============================================================ */
+function loadSavedTactic(tac){
+  freeMode = true;
+  cur = null;
+  currentSavedId = tac.id;
+  playing = false;
+  tNow = 0;
+  buildCourt();
+
+  document.querySelectorAll('.mode-tab').forEach(b=>{
+    b.classList.toggle('active', b.dataset.mode === 'free');
+  });
+  document.getElementById('nav').style.display = 'none';
+  document.getElementById('drawPanel').style.display = 'block';
+
+  document.getElementById('tacName').textContent = tac.name;
+  document.getElementById('tacSub').textContent = tac.sub || (tac.source === 'club' ? 'Táctica del club' : 'Mi táctica');
+
+  const pill = document.getElementById('phasePill');
+  pill.classList.remove('free');
+  pill.classList.add('saved');
+  pill.style.display = 'inline-block';
+  pill.textContent = tac.source === 'club' ? '☁️ Club' : '⭐ Guardada';
+
+  clearTacticLayers();
+  clearNode(getLayer('drawLayer'));
+
+  strokes = deepCopy(tac.strokes || []);
+  currentStroke = null;
+
+  recomputeTiming();
+  if(strokes.length === 0) dur = 0.6;
+  renderFreeNotes();
+  updatePlayBtn();
+  render();
+}
+
+/* ============================================================
+   RENDER TÁCTICA
+   ============================================================ */
+function renderTactic(){
+  if(!cur) return;
+  ['us','them'].forEach(side=>{
+    const src = cur[side];
+    if(!src) return;
+    const moved = (side==='us') ? cur.moves : null;
+    Object.keys(els[side] || {}).forEach(n=>{
+      const base = [src[n][0], src[n][1], 0];
+      const kfs = (moved && moved[n]) ? [base, ...moved[n]] : [base];
+      const p = interp(kfs, tNow, false);
+      if(p && els[side][n]){
+        els[side][n].setAttribute('transform', `translate(${X(p[0])},${Y(p[1])})`);
+      }
+    });
+  });
+  if(els.ball && cur.ball){
+    const p = interp(cur.ball, tNow, true);
+    if(p) els.ball.setAttribute('transform', `translate(${X(p[0])},${Y(p[1])})`);
+  }
+  if(cur.phases){
+    let label = cur.phases[0][1];
+    for(const [tm, lb] of cur.phases){ if(tNow >= tm) label = lb; }
+    const pill = document.getElementById('phasePill');
+    if(pill && !pill.classList.contains('saved')) pill.textContent = label;
+  }
+}
+
+/* ============================================================
+   DIBUJO
+   ============================================================ */
+function svgPoint(e){
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+function computeLengths(s){
+  if(s.type !== 'path') return;
+  const pts = s.points, cum = [0]; let total = 0;
+  for(let i=1;i<pts.length;i++){
+    total += Math.hypot(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]);
+    cum.push(total);
+  }
+  s.cum = cum; s.len = total;
+}
+function pointsAtProgress(s, p){
+  const pts = s.points, cum = s.cum;
+  if(!pts || pts.length === 0) return [];
+  if(pts.length === 1) return [pts[0]];
+  const target = s.len * Math.max(0, Math.min(1, p));
+  const out = [pts[0]];
+  for(let i=1;i<pts.length;i++){
+    if(cum[i] <= target){ out.push(pts[i]); }
+    else {
+      const segLen = cum[i] - cum[i-1];
+      const u = segLen > 0 ? (target - cum[i-1]) / segLen : 0;
+      out.push([pts[i-1][0] + (pts[i][0]-pts[i-1][0])*u,
+                pts[i-1][1] + (pts[i][1]-pts[i-1][1])*u]);
+      break;
+    }
+  }
+  return out;
+}
+function smoothPath(pts){
+  if(!pts || !pts.length) return '';
+  if(pts.length === 1) return `M ${pts[0][0]} ${pts[0][1]} L ${pts[0][0]+0.5} ${pts[0][1]}`;
+  if(pts.length === 2) return `M ${pts[0][0]} ${pts[0][1]} L ${pts[1][0]} ${pts[1][1]}`;
+  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  for(let i=1;i<pts.length-1;i++){
+    const mx = (pts[i][0] + pts[i+1][0])/2;
+    const my = (pts[i][1] + pts[i+1][1])/2;
+    d += ` Q ${pts[i][0]} ${pts[i][1]} ${mx} ${my}`;
+  }
+  d += ` L ${pts[pts.length-1][0]} ${pts[pts.length-1][1]}`;
+  return d;
+}
+function distToSegment(px, py, a, b){
+  const dx = b[0]-a[0], dy = b[1]-a[1];
+  const len2 = dx*dx + dy*dy;
+  let u = len2 > 0 ? ((px-a[0])*dx + (py-a[1])*dy)/len2 : 0;
+  u = Math.max(0, Math.min(1, u));
+  return Math.hypot(px - (a[0] + u*dx), py - (a[1] + u*dy));
+}
+function hitTest(x, y){
+  let best = -1, bestD = Infinity;
+  strokes.forEach((s, i)=>{
+    if(s.type === 'dot'){
+      const d = Math.hypot(s.x - x, s.y - y);
+      if(d < 34 && d < bestD){ bestD = d; best = i; }
+    } else if(s.points && s.points.length > 1){
+      for(let j=1;j<s.points.length;j++){
+        const d = distToSegment(x, y, s.points[j-1], s.points[j]);
+        if(d < 22 && d < bestD){ bestD = d; best = i; }
+      }
+    }
+  });
+  return best;
+}
+function recomputeTiming(){
+  let t = 0;
+  strokes.forEach(s=>{
+    s.t0 = t;
+    let d;
+    if(s.type === 'dot') d = 0.35;
+    else d = Math.min(2.8, Math.max(1.0, 0.4 + (s.points ? s.points.length : 0) * 0.025));
+    s.t1 = t + d;
+    t = s.t1 + 0.12;
+  });
+  if(freeMode){
+    dur = Math.max(0.6, t);
+    if(tNow > dur) tNow = dur;
+  }
+}
+
+function renderPath(s, progress, layer){
+  if(progress <= 0) return;
+  const pts = pointsAtProgress(s, progress);
+  if(pts.length === 0) return;
+  const d = smoothPath(pts);
+  if(!d) return;
+  const path = el('path', {
+    d, fill:'none', stroke:s.color, 'stroke-width':4.5,
+    'stroke-linecap':'round', 'stroke-linejoin':'round', opacity:.98
+  });
+  path.style.filter = `drop-shadow(0 0 5px ${s.color}66)`;
+  layer.appendChild(path);
+
+  if(s.attachedTo && s.points.length > 0){
+    const start = s.points[0];
+    layer.appendChild(el('circle', {
+      cx: start[0], cy: start[1], r: 22,
+      fill:'none', stroke: s.color, 'stroke-width': 2,
+      'stroke-dasharray': '4 5', opacity: 0.65
+    }));
+  }
+  if(progress >= 0.94 && s.points.length >= 2){
+    const n = s.points.length;
+    const [x1,y1] = s.points[n-2];
+    const [x2,y2] = s.points[n-1];
+    const ang = Math.atan2(y2-y1, x2-x1);
+    const size = 15;
+    const back = ang + Math.PI;
+    const ax = x2 + size*Math.cos(back - 0.45);
+    const ay = y2 + size*Math.sin(back - 0.45);
+    const bx = x2 + size*Math.cos(back + 0.45);
+    const by = y2 + size*Math.sin(back + 0.45);
+    layer.appendChild(el('path', {
+      d: `M ${x2} ${y2} L ${ax} ${ay} L ${bx} ${by} Z`,
+      fill: s.color, opacity: Math.min(1, (progress - 0.94) / 0.06)
+    }));
+  }
+}
+
+function renderFicha(s, cx, cy, layer, progress){
+  const p = Math.max(0, Math.min(1, progress));
+  const scale = 0.55 + 0.45 * p;
+  const g = el('g', {class:'dot-figure', opacity: p});
+  g.appendChild(el('circle', {cx, cy, r:16*scale, fill:s.color,
+    stroke:'#ffffff', 'stroke-width':2.5, opacity:.95}));
+  if(s.number){
+    const t = el('text', {x:cx, y:cy, 'font-size':13, 'font-weight':900,
+      'text-anchor':'middle', 'dominant-baseline':'central',
+      fill:'#0a0f18', 'font-family':'Segoe UI, sans-serif', 'pointer-events':'none'});
+    t.textContent = s.number; g.appendChild(t);
+  }
+  if(s.name){
+    const t = el('text', {x:cx, y:cy + 26*scale, 'font-size':9, 'font-weight':600,
+      'text-anchor':'middle', 'dominant-baseline':'hanging',
+      fill:'#ffffff', 'font-family':'Segoe UI, sans-serif',
+      'paint-order':'stroke', stroke:'#000', 'stroke-width':3,
+      'stroke-linejoin':'round', 'pointer-events':'none'});
+    t.textContent = s.name; g.appendChild(t);
+  }
+  layer.appendChild(g);
+}
+
+function renderFree(){
+  const layer = getLayer('drawLayer');
+  if(!layer) return;
+  clearNode(layer);
+
+  const all = currentStroke ? [...strokes, currentStroke] : strokes;
+
+  all.forEach(s=>{
+    if(s.type !== 'path') return;
+    let p;
+    if(s === currentStroke) p = 1;
+    else { const span = Math.max(0.001, s.t1 - s.t0); p = (tNow - s.t0) / span; }
+    if(p > 0) renderPath(s, Math.min(1, p), layer);
+  });
+
+  all.forEach(s=>{
+    if(s.type !== 'dot') return;
+    const mover = all.find(t => t.type === 'path' && t.attachedTo === s.id);
+    let cx = s.x, cy = s.y, animP = 1;
+    if(mover){
+      let p;
+      if(mover === currentStroke) p = 1;
+      else { const span = Math.max(0.001, mover.t1 - mover.t0); p = (tNow - mover.t0) / span; }
+      if(p > 0){
+        animP = Math.max(0, Math.min(1, p));
+        const pts = pointsAtProgress(mover, animP);
+        if(pts.length > 0){ cx = pts[pts.length-1][0]; cy = pts[pts.length-1][1]; }
+      }
+    }
+    renderFicha(s, cx, cy, layer, animP);
+  });
+
+  const pill = document.getElementById('phasePill');
+  if(!pill) return;
+  if(currentSavedId){
+    pill.classList.add('saved');
+    pill.classList.remove('free');
+    const savedTac = savedTactics.find(t=>t.id===currentSavedId) || clubTactics.find(t=>t.id===currentSavedId);
+    pill.textContent = (savedTac && savedTac.source === 'club' ? '☁️ Club' : '⭐ Guardada');
+  } else {
+    pill.classList.add('free');
+    pill.classList.remove('saved');
+    if(strokes.length === 0){
+      pill.textContent = 'Pizarra libre · Dibujá una jugada';
+    } else if(tNow < dur - 0.01){
+      pill.textContent = 'Reproduciendo…';
+    } else {
+      pill.textContent = `${strokes.length} elemento${strokes.length===1?'':'s'} · sin guardar`;
+    }
+  }
+}
+
+function render(){
+  if(freeMode) renderFree();
+  else renderTactic();
+
+  const sc = document.getElementById('scrub');
+  if(sc && document.activeElement !== sc){
+    sc.value = Math.round((tNow/Math.max(0.001,dur))*1000);
+  }
+  const tl = document.getElementById('timeLabel');
+  if(tl) tl.textContent = tNow.toFixed(1)+'s';
+}
+
+/* ============================================================
+   NOTAS
+   ============================================================ */
+function creditHTML(){
+  return `
+    <div class="notes-credit">
+      <span class="nc-label">Desarrollado por</span>
+      <a href="https://webohmygoch.onrender.com/" target="_blank" rel="noopener" class="nc-logo">
+        Oh my <span class="nc-accent">goch!</span>
+      </a>
+      <span class="nc-tag">consultoría · big data & IA</span>
+      <a href="https://webohmygoch.onrender.com/" target="_blank" rel="noopener" class="nc-link">
+        webohmygoch.onrender.com
+      </a>
+    </div>`;
+}
+
+function renderTacticNotes(tac){
+  const n = tac.notes || {};
+  let html = '';
+  html += `<h3>Objetivo</h3><div class="obj">${n.obj || ''}</div>`;
+  if(n.roles && n.roles.length){
+    html += `<h3>Roles</h3><ul class="role-list">`;
+    n.roles.forEach(([num, txt])=>{ html += `<li><span class="badge">${num}</span><span>${txt}</span></li>`; });
+    html += `</ul>`;
+  }
+  if(n.keys && n.keys.length){
+    html += `<h3>Claves de ejecución</h3><ul class="nlist good">`;
+    n.keys.forEach(k=> html += `<li>${k}</li>`);
+    html += `</ul>`;
+  }
+  if(n.errs && n.errs.length){
+    html += `<h3>Errores frecuentes</h3><ul class="nlist warn">`;
+    n.errs.forEach(k=> html += `<li>${k}</li>`);
+    html += `</ul>`;
+  }
+  html += legendHTML();
+  html += creditHTML();
+  document.getElementById('notes').innerHTML = html;
+}
+
+function renderFreeNotes(){
+  const savedTac = currentSavedId ?
+    (savedTactics.find(t=>t.id===currentSavedId) || clubTactics.find(t=>t.id===currentSavedId)) : null;
+
+  let html = '';
+  if(savedTac){
+    html += `<h3>${savedTac.source === 'club' ? '☁️ Táctica del club' : '⭐ Mi táctica'}</h3>
+      <div class="obj">
+        <b>${savedTac.name}</b><br>
+        <span style="color:#8ba0bd;font-size:11px">Categoría: ${savedTac.cat || 'Sin categoría'}</span>
+        ${savedTac.sub ? `<br><br>${savedTac.sub}` : ''}
+      </div>`;
+    if(savedTac.source !== 'club'){
+      html += `<div style="margin-top:10px">
+        <button class="ghost-btn" id="btnDeleteCurrent" style="width:100%">🗑 Borrar esta táctica</button>
+      </div>`;
+    }
+  } else {
+    html += `<h3>Cómo usar la pizarra</h3>
+      <div class="obj">
+        <b>1.</b> Colocá fichas con la herramienta <b>Ficha</b>.<br><br>
+        <b>2.</b> Cambiá a <b>Trazo</b> y empezá a dibujar <b>sobre una ficha</b> para moverla.<br><br>
+        <b>3.</b> Tocá <b>💾 Guardar</b> para que quede en "Mis tácticas".<br><br>
+        <b>4.</b> Compartí con <b>📤 Exportar</b> o cargá las del club con <b>☁️ Cargar</b>.
+      </div>`;
+  }
+
+  html += `<h3>Recomendaciones</h3>
+    <ul class="nlist good">
+      <li>Dibujá <b>una acción por vez</b>.</li>
+      <li>Un color distinto por jugador.</li>
+      <li>Guardá con un nombre claro: "Ataque 4 con cruce", "Recepción W".</li>
+      <li>Exportá tus tácticas antes de cambiar de dispositivo.</li>
+    </ul>`;
+
+  html += legendHTML();
+  html += creditHTML();
+  document.getElementById('notes').innerHTML = html;
+
+  const btnDel = document.getElementById('btnDeleteCurrent');
+  if(btnDel) btnDel.onclick = ()=> deleteCurrentSaved();
+}
+
+function legendHTML(){
+  return `<h3>Leyenda</h3>
+    <div class="legend">
+      <span><i class="dot" style="background:#3b82f6"></i>Nuestro equipo</span>
+      <span><i class="dot" style="background:#ef4444"></i>Rival</span>
+      <span><i class="dot" style="background:#ffd23f"></i>Pelota / trazo</span>
+      <span><i class="dot" style="background:#8aa8d0"></i>Desplazamiento</span>
+      <span><i class="dot" style="background:#ff8a3d"></i>Jugador clave</span>
+    </div>`;
+}
+
+/* ============================================================
+   BUCLE
+   ============================================================ */
+function loop(ts){
+  if(playing){
+    if(!lastTs) lastTs = ts;
+    tNow += ((ts - lastTs)/1000);
+    if(tNow >= dur){ tNow = dur; playing = false; updatePlayBtn(); }
+    render();
+  }
+  lastTs = ts;
+  requestAnimationFrame(loop);
+}
+function updatePlayBtn(){
+  const b = document.getElementById('btnPlay');
+  if(b) b.innerHTML = playing ? '❚❚ <span class="hide-sm">Pausar</span>' : '▶ <span class="hide-sm">Reproducir</span>';
+}
+
+/* ============================================================
+   CAMBIO DE MODO
+   ============================================================ */
+function setMode(mode){
+  if(window.innerWidth <= 900 && window.__closeDrawer) window.__closeDrawer();
+  if(mode === 'free'){
+    freeMode = true; cur = null; currentSavedId = null;
+    playing = false; tNow = 0;
+    document.querySelectorAll('.mode-tab').forEach(b=>{
+      b.classList.toggle('active', b.dataset.mode === 'free');
+    });
+    document.getElementById('nav').style.display = 'none';
+    document.getElementById('drawPanel').style.display = 'block';
+    document.getElementById('tacName').textContent = 'Pizarra libre';
+    document.getElementById('tacSub').textContent = 'Colocá fichas, trazá movimientos, reproducí.';
+    clearTacticLayers();
+    clearNode(getLayer('drawLayer'));
+    const pill = document.getElementById('phasePill');
+    pill.classList.remove('saved');
+    recomputeTiming();
+    if(strokes.length === 0) dur = 0.6;
+    renderFreeNotes();
+    updatePlayBtn();
+    render();
+  } else {
+    freeMode = false; playing = false; currentSavedId = null;
+    document.querySelectorAll('.mode-tab').forEach(b=>{
+      b.classList.toggle('active', b.dataset.mode === 'tactics');
+    });
+    document.getElementById('nav').style.display = 'block';
+    document.getElementById('drawPanel').style.display = 'none';
+    clearNode(getLayer('drawLayer'));
+    const activeBtn = document.querySelector('.tac-btn.active') || document.querySelector('.tac-btn');
+    if(activeBtn && activeBtn.dataset.id && activeBtn.dataset.source !== 'saved'){
+      const tac = TACTICS.find(t=>t.id === activeBtn.dataset.id);
+      if(tac) loadTactic(tac);
+    } else if(TACTICS.length){
+      loadTactic(TACTICS[0]);
+    }
+    updatePlayBtn();
+  }
+}
+
+/* ============================================================
+   EVENTOS DE DIBUJO
+   ============================================================ */
+function onPointerDown(e){
+  if(!freeMode) return;
+  e.preventDefault();
+  playing = false; updatePlayBtn();
+  const p = svgPoint(e);
+
+  if(drawTool === 'dot'){
+    strokes.push({
+      type:'dot', id: uid('dot'), x:p.x, y:p.y, color: drawColor,
+      number: '', name: '', t0:0, t1:0.35
+    });
+    recomputeTiming();
+    tNow = dur;
+    render();
+    return;
+  }
+  if(drawTool === 'erase'){
+    const idx = hitTest(p.x, p.y);
+    if(idx >= 0){
+      strokes.splice(idx, 1);
+      recomputeTiming();
+      if(strokes.length === 0) dur = 0.6;
+      tNow = dur;
+      render();
+    }
+    return;
+  }
+
+  isDrawing = true;
+  let attachedTo = null;
+  for(let i = strokes.length - 1; i >= 0; i--){
+    const s = strokes[i];
+    if(s.type === 'dot' && Math.hypot(s.x - p.x, s.y - p.y) < 36){
+      attachedTo = s.id; break;
+    }
+  }
+  currentStroke = { type:'path', points:[[p.x, p.y]], color: drawColor, attachedTo };
+  try{ svg.setPointerCapture(e.pointerId); }catch(_){}
+  render();
+}
+
+function onPointerMove(e){
+  if(!freeMode || !isDrawing || !currentStroke) return;
+  e.preventDefault();
+  const p = svgPoint(e);
+  const pts = currentStroke.points;
+  const last = pts[pts.length-1];
+  if(Math.hypot(p.x-last[0], p.y-last[1]) < 3.5) return;
+  pts.push([p.x, p.y]);
+  render();
+}
+
+function onPointerUp(e){
+  if(!freeMode || !isDrawing) return;
+  isDrawing = false;
+  if(currentStroke){
+    if(currentStroke.points.length > 1){
+      computeLengths(currentStroke);
+      strokes.push(currentStroke);
+      recomputeTiming();
+      tNow = dur;
+    }
+    currentStroke = null;
+  }
+  render();
+}
+
+function onSvgClick(e){
+  if(!freeMode) return;
+  const p = svgPoint(e);
+  const idx = hitTest(p.x, p.y);
+  if(idx >= 0 && strokes[idx].type === 'dot' && drawTool !== 'erase'){
+    const s = strokes[idx];
+    if(Math.hypot(s.x - p.x, s.y - p.y) < 22) openEditModal(idx);
+  }
+}
+
+svg.addEventListener('pointerdown', onPointerDown);
+svg.addEventListener('pointermove', onPointerMove);
+svg.addEventListener('pointerup', onPointerUp);
+svg.addEventListener('pointercancel', onPointerUp);
+svg.addEventListener('pointerleave', onPointerUp);
+svg.addEventListener('click', onSvgClick);
+svg.addEventListener('contextmenu', e=>{ if(freeMode) e.preventDefault(); });
+
+/* ============================================================
+   MODAL EDICIÓN DE FICHA
+   ============================================================ */
+function openEditModal(index){
+  editingStrokeIndex = index;
+  const s = strokes[index];
+  document.getElementById('editNumber').value = s.number || '';
+  document.getElementById('editName').value = s.name || '';
+  const colorRow = document.getElementById('editColorRow');
+  clearNode(colorRow);
+  COLORS.forEach(c=>{
+    const btn = document.createElement('button');
+    btn.style.cssText = `width:30px;height:30px;border-radius:50%;background:${c};border:2px solid ${c === s.color ? '#fff' : 'transparent'};cursor:pointer;box-shadow:0 0 0 1px rgba(255,255,255,.15) inset`;
+    btn.onclick = ()=>{
+      colorRow.querySelectorAll('button').forEach(b=>b.style.borderColor = 'transparent');
+      btn.style.borderColor = '#fff';
+      s.color = c;
+    };
+    colorRow.appendChild(btn);
+  });
+  document.getElementById('editModal').classList.add('show');
+  setTimeout(()=>document.getElementById('editNumber').focus(), 100);
+}
+document.getElementById('btnEditCancel').onclick = ()=>{
+  document.getElementById('editModal').classList.remove('show');
+  editingStrokeIndex = -1;
+};
+document.getElementById('btnEditSave').onclick = ()=>{
+  if(editingStrokeIndex < 0) return;
+  const s = strokes[editingStrokeIndex];
+  s.number = document.getElementById('editNumber').value.trim();
+  s.name = document.getElementById('editName').value.trim();
+  document.getElementById('editModal').classList.remove('show');
+  editingStrokeIndex = -1;
+  render();
+};
+document.getElementById('editModal').addEventListener('click', (e)=>{
+  if(e.target === e.currentTarget) document.getElementById('editModal').classList.remove('show');
+});
+
+/* ============================================================
+   MODAL GUARDAR TÁCTICA
+   ============================================================ */
+document.getElementById('btnSaveTactic').onclick = ()=>{
+  if(!freeMode || strokes.length === 0){
+    alert('Primero dibujá una jugada en la pizarra libre');
+    return;
+  }
+  const current = currentSavedId ? (savedTactics.find(t=>t.id===currentSavedId) || clubTactics.find(t=>t.id===currentSavedId)) : null;
+  document.getElementById('saveName').value = current ? current.name : '';
+  document.getElementById('saveCat').value = current ? (current.cat || 'Ataque') : 'Ataque';
+  document.getElementById('saveDesc').value = current ? (current.sub || '') : '';
+  document.getElementById('saveModal').classList.add('show');
+  setTimeout(()=>document.getElementById('saveName').focus(), 100);
+};
+
+document.getElementById('btnSaveCancel').onclick = ()=>{
+  document.getElementById('saveModal').classList.remove('show');
+};
+
+document.getElementById('btnSaveConfirm').onclick = ()=>{
+  const nombre = document.getElementById('saveName').value.trim();
+  const cat = document.getElementById('saveCat').value;
+  const desc = document.getElementById('saveDesc').value.trim();
+  if(!nombre){
+    alert('Poné un nombre para la táctica');
+    return;
+  }
+
+  const nueva = {
+    id: currentSavedId || uid('user'),
+    name: nombre,
+    cat: cat,
+    sub: desc,
+    source: 'user',
+    strokes: deepCopy(strokes),
+    createdAt: new Date().toISOString()
+  };
+
+  if(currentSavedId){
+    // Actualizar existente (solo si era del usuario, no del club)
+    const idx = savedTactics.findIndex(t=>t.id===currentSavedId);
+    if(idx >= 0){
+      savedTactics[idx] = nueva;
+    } else {
+      // Era del club: guardar como copia del usuario
+      nueva.id = uid('user');
+      savedTactics.push(nueva);
+      currentSavedId = nueva.id;
+    }
+  } else {
+    savedTactics.push(nueva);
+    currentSavedId = nueva.id;
+  }
+
+  persistSaved();
+  rebuildNav();
+  document.getElementById('saveModal').classList.remove('show');
+  document.getElementById('tacName').textContent = nueva.name;
+  document.getElementById('tacSub').textContent = nueva.sub || 'Mi táctica';
+  renderFreeNotes();
+  render();
+};
+
+document.getElementById('saveModal').addEventListener('click', (e)=>{
+  if(e.target === e.currentTarget) document.getElementById('saveModal').classList.remove('show');
+});
+
+/* ============================================================
+   EXPORTAR / IMPORTAR / CLUB
+   ============================================================ */
+document.getElementById('btnExport').onclick = ()=>{
+  if(savedTactics.length === 0){
+    alert('No tenés tácticas guardadas todavía');
+    return;
+  }
+  const data = {
+    version: 1,
+    club: 'GEI Vóley',
+    exportedAt: new Date().toISOString(),
+    tacticas: savedTactics
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tacticas-gei-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+};
+
+document.getElementById('btnImport').onclick = ()=>{
+  document.getElementById('fileImport').click();
+};
+
+document.getElementById('fileImport').addEventListener('change', (e)=>{
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const data = JSON.parse(ev.target.result);
+      const incoming = data.tacticas || data.tactics || (Array.isArray(data) ? data : []);
+      if(!incoming.length) throw new Error('El archivo no contiene tácticas');
+      const existingIds = new Set(savedTactics.map(t=>t.id));
+      const nuevas = incoming.filter(t => t.id && !existingIds.has(t.id));
+      // Reasignar ids a las nuevas para evitar colisiones
+      nuevas.forEach(t=>{
+        if(!t.id || existingIds.has(t.id)) t.id = uid('user');
+        t.source = 'user';
+      });
+      savedTactics = [...savedTactics, ...nuevas];
+      persistSaved();
+      rebuildNav();
+      alert(`✅ Se importaron ${nuevas.length} tácticas nuevas (${incoming.length - nuevas.length} ya existían o fueron ignoradas)`);
+    }catch(err){
+      alert('❌ Error al importar: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';  // permitir reimportar el mismo archivo
+});
+
+document.getElementById('btnLoadClub').onclick = async ()=>{
+  try{
+    const res = await fetch('./tacticas-club.json?t=' + Date.now());
+    if(!res.ok) throw new Error('No se pudo descargar el archivo');
+    const data = await res.json();
+    const incoming = data.tacticas || [];
+    incoming.forEach(t=> t.source = 'club');
+    clubTactics = incoming;
+    try{ localStorage.setItem('gei-club-cache', JSON.stringify(clubTactics)); }catch(_){}
+    rebuildNav();
+    alert(`✅ Se cargaron ${clubTactics.length} tácticas del club`);
+  }catch(err){
+    alert('❌ No se pudieron cargar las tácticas del club.\n\n' + err.message + '\n\nVerificá que el archivo tacticas-club.json exista junto al index.html.');
+  }
+};
+
+function deleteCurrentSaved(){
+  if(!currentSavedId) return;
+  const savedTac = savedTactics.find(t=>t.id===currentSavedId);
+  if(!savedTac) return;
+  if(!confirm(`¿Borrar la táctica "${savedTac.name}"?`)) return;
+  savedTactics = savedTactics.filter(t=>t.id !== currentSavedId);
+  persistSaved();
+  currentSavedId = null;
+  rebuildNav();
+  renderFreeNotes();
+  render();
+}
+
+/* ============================================================
+   CONTROLES
+   ============================================================ */
+document.getElementById('btnPlay').onclick = ()=>{
+  if(freeMode && strokes.length === 0) return;
+  if(!freeMode && !cur) return;
+  if(tNow >= dur) tNow = 0;
+  playing = !playing;
+  lastTs = 0;
+  updatePlayBtn();
+};
+document.getElementById('btnReset').onclick = ()=>{
+  tNow = 0; playing = false; updatePlayBtn(); render();
+};
+document.getElementById('scrub').oninput = e=>{
+  playing = false; updatePlayBtn();
+  tNow = (e.target.value/1000) * dur;
+  render();
+};
+document.getElementById('btnFocus').onclick = ()=>{
+  const app = document.getElementById('app');
+  app.classList.toggle('focus');
+  const on = app.classList.contains('focus');
+  document.getElementById('btnFocus').innerHTML = on
+    ? '✕ <span class="hide-sm">Salir</span>'
+    : '⛶ <span class="hide-sm">Modo tiempo muerto</span>';
+  if(window.__fitCourt){
+    window.__fitCourt();
+    setTimeout(window.__fitCourt, 30);
+    setTimeout(window.__fitCourt, 100);
+    setTimeout(window.__fitCourt, 260);
+    setTimeout(window.__fitCourt, 420);
+  }
+};
+
+/* ============================================================
+   TECLADO
+   ============================================================ */
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if(e.code === 'Space'){ e.preventDefault(); document.getElementById('btnPlay').click(); }
+  if(e.code === 'KeyR'){ document.getElementById('btnReset').click(); }
+  if(e.code === 'ArrowRight'){ tNow = Math.min(dur, tNow + 0.25); render(); }
+  if(e.code === 'ArrowLeft'){ tNow = Math.max(0, tNow - 0.25); render(); }
+  if(freeMode && (e.ctrlKey || e.metaKey) && e.code === 'KeyZ'){
+    e.preventDefault();
+    document.getElementById('btnUndo').click();
+  }
+  if(e.key === 'Escape'){
+    document.getElementById('editModal').classList.remove('show');
+    document.getElementById('saveModal').classList.remove('show');
+  }
+});
+
+/* ============================================================
+   DRAWER MÓVIL
+   ============================================================ */
+(function setupDrawer(){
+  const btnMenu = document.getElementById('btnMenu');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('drawerOverlay');
+  if(!btnMenu || !sidebar || !overlay) return;
+
+  function openDrawer(){ sidebar.classList.add('open'); overlay.classList.add('show'); document.body.style.overflow = 'hidden'; }
+  function closeDrawer(){ sidebar.classList.remove('open'); overlay.classList.remove('show'); document.body.style.overflow = ''; }
+  function toggleDrawer(){ sidebar.classList.contains('open') ? closeDrawer() : openDrawer(); }
+
+  btnMenu.addEventListener('click', toggleDrawer);
+  overlay.addEventListener('click', closeDrawer);
+  document.querySelectorAll('.mode-tab').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ if(window.innerWidth <= 900) closeDrawer(); });
+  });
+  window.addEventListener('resize', ()=>{ if(window.innerWidth > 900) closeDrawer(); });
+  window.__closeDrawer = closeDrawer;
+})();
+
+/* ============================================================
+   UI PIZARRA LIBRE
+   ============================================================ */
+document.querySelectorAll('.mode-tab').forEach(b=>{ b.onclick = ()=> setMode(b.dataset.mode); });
+
+document.querySelectorAll('.tool-btn').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('.tool-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    drawTool = b.dataset.tool;
+    svg.classList.remove('tool-erase','tool-dot');
+    if(drawTool === 'erase') svg.classList.add('tool-erase');
+    if(drawTool === 'dot')   svg.classList.add('tool-dot');
+  };
+});
+
+const colorRowEl = document.getElementById('colorRow');
+COLORS.forEach((c,i)=>{
+  const b = document.createElement('button');
+  b.className = 'color-dot' + (i===0 ? ' active' : '');
+  b.style.background = c;
+  b.dataset.color = c;
+  b.onclick = ()=>{
+    document.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    drawColor = c;
+  };
+  colorRowEl.appendChild(b);
+});
+
+document.getElementById('btnUndo').onclick = ()=>{
+  if(strokes.length === 0) return;
+  strokes.pop();
+  recomputeTiming();
+  if(strokes.length === 0) dur = 0.6;
+  tNow = dur;
+  render();
+};
+document.getElementById('btnClear').onclick = ()=>{
+  if(strokes.length === 0) return;
+  if(!confirm('¿Borrar toda la pizarra?')) return;
+  strokes = []; currentStroke = null; currentSavedId = null;
+  dur = 0.6; tNow = 0;
+  document.getElementById('tacName').textContent = 'Pizarra libre';
+  document.getElementById('tacSub').textContent = 'Colocá fichas, trazá movimientos, reproducí.';
+  renderFreeNotes();
+  render();
+};
+
+/* ============================================================
+   NAV DINÁMICO
+   ============================================================ */
+function rebuildNav(){
+  const nav = document.getElementById('nav');
+  if(!nav) return;
+  clearNode(nav);
+
+  function addCategory(title, items, source){
+    if(items.length === 0 && source === 'empty-skip') return;
+    const h = document.createElement('div');
+    h.className = 'cat-title';
+    h.innerHTML = `<span>${title}</span>` + (items.length ? `<span class="cat-count">${items.length}</span>` : '');
+    nav.appendChild(h);
+
+    if(items.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'nav-empty';
+      empty.textContent = source === 'user' ? 'Todavía no guardaste tácticas. Dibujá una en Pizarra libre y tocá 💾 Guardar.' : 'Sin tácticas del club cargadas.';
+      nav.appendChild(empty);
+      return;
+    }
+
+    items.forEach(tac=>{
+      const b = document.createElement('button');
+      b.className = 'tac-btn';
+      b.dataset.id = tac.id;
+      b.dataset.source = source;
+
+      const span = document.createElement('span');
+      span.className = 'tac-name';
+      span.textContent = tac.name;
+      b.appendChild(span);
+
+      if(source === 'user'){
+        const del = document.createElement('span');
+        del.className = 'tac-del';
+        del.textContent = '×';
+        del.title = 'Borrar';
+        del.onclick = (e)=>{
+          e.stopPropagation();
+          if(!confirm(`¿Borrar "${tac.name}"?`)) return;
+          savedTactics = savedTactics.filter(t=>t.id !== tac.id);
+          persistSaved();
+          if(currentSavedId === tac.id){ currentSavedId = null; }
+          rebuildNav();
+          renderFreeNotes();
+          render();
+        };
+        b.appendChild(del);
+      }
+
+      b.onclick = ()=>{
+        document.querySelectorAll('.tac-btn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        if(window.innerWidth <= 900 && window.__closeDrawer) window.__closeDrawer();
+        if(source === 'base'){
+          setMode('tactics');
+          loadTactic(tac);
+        } else {
+          loadSavedTactic(tac);
+        }
+      };
+      nav.appendChild(b);
+    });
+  }
+
+  // Categoría: BASE del club (las 17 predefinidas)
+  const baseCats = [...new Set(TACTICS.map(t=>t.cat))];
+  baseCats.forEach(cat=>{
+    const items = TACTICS.filter(t=>t.cat===cat);
+    const h = document.createElement('div');
+    h.className = 'cat-title';
+    h.innerHTML = `<span>${cat}</span><span class="cat-count">${items.length}</span>`;
+    nav.appendChild(h);
+    items.forEach(tac=>{
+      const b = document.createElement('button');
+      b.className = 'tac-btn';
+      b.dataset.id = tac.id;
+      b.dataset.source = 'base';
+      const span = document.createElement('span');
+      span.className = 'tac-name';
+      span.textContent = tac.name;
+      b.appendChild(span);
+      b.onclick = ()=>{
+        document.querySelectorAll('.tac-btn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        if(window.innerWidth <= 900 && window.__closeDrawer) window.__closeDrawer();
+        setMode('tactics');
+        loadTactic(tac);
+      };
+      nav.appendChild(b);
+    });
+  });
+
+  // Categoría: MIS TÁCTICAS
+  addCategory('Mis tácticas', savedTactics, 'user');
+
+  // Categoría: CLUB (del JSON externo)
+  if(clubTactics.length > 0){
+    addCategory('☁️ Tácticas del club', clubTactics, 'club');
+  }
+}
+
+/* ============================================================
+   AJUSTE AUTOMÁTICO DE LA CANCHA
+   ============================================================ */
+(function(){
+  const RATIO = 470 / 840;
+  function fitCourt(){
+    const wrap = document.getElementById('courtWrap');
+    const court = document.getElementById('court');
+    if(!wrap || !court) return;
+    const cs = getComputedStyle(wrap);
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const w = wrap.clientWidth - padX;
+    const h = wrap.clientHeight - padY;
+    if(w <= 0 || h <= 0) return;
+    let width = w, height = width / RATIO;
+    if(height > h){ height = h; width = height * RATIO; }
+    court.style.width = Math.round(width) + 'px';
+    court.style.height = Math.round(height) + 'px';
+  }
+  function scheduleFit(){
+    requestAnimationFrame(fitCourt);
+    setTimeout(fitCourt, 50);
+    setTimeout(fitCourt, 200);
+    setTimeout(fitCourt, 500);
+  }
+  window.addEventListener('load', scheduleFit);
+  window.addEventListener('resize', fitCourt);
+  window.addEventListener('orientationchange', scheduleFit);
+  if(window.ResizeObserver){
+    const wrap = document.getElementById('courtWrap');
+    if(wrap){ new ResizeObserver(fitCourt).observe(wrap); }
+  }
+  if(window.MutationObserver){
+    const app = document.getElementById('app');
+    if(app){
+      new MutationObserver(()=>{
+        fitCourt();
+        setTimeout(fitCourt, 60);
+        setTimeout(fitCourt, 200);
+        setTimeout(fitCourt, 400);
+      }).observe(app, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
+  scheduleFit();
+  window.__fitCourt = fitCourt;
+})();
+
+/* ============================================================
+   ARRANQUE
+   ============================================================ */
+function boot(){
+  buildCourt();
+  setupClubLogo();
+  loadSavedFromStorage();
+
+  // Intentar cargar cache de tácticas del club
+  try{
+    const cache = localStorage.getItem('gei-club-cache');
+    if(cache) clubTactics = JSON.parse(cache);
+  }catch(_){}
+
+  rebuildNav();
+
+  if(TACTICS.length){
+    const firstBtn = document.querySelector('.tac-btn');
+    if(firstBtn){ firstBtn.classList.add('active'); }
+    loadTactic(TACTICS[0]);
+  }
+
+  requestAnimationFrame(loop);
+  if(window.__fitCourt){
+    setTimeout(window.__fitCourt, 100);
+    setTimeout(window.__fitCourt, 300);
+  }
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
+</script>
+</body>
+</html>
