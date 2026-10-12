@@ -1,8 +1,9 @@
 {
+  "id": "/pizar/",
   "name": "Pizarra Táctica GEI Vóley",
   "short_name": "Pizarra GEI",
   "description": "Pizarra táctica interactiva para el club GEI Vóley de Ituzaingó.",
-  "start_url": "./",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
