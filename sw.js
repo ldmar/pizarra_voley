@@ -1,6 +1,5 @@
 /* Service Worker — Pizarra Táctica GEI Vóley */
-const CACHE_VERSION = 'pizarra_voley-v3';   // ← subimos a v2 para forzar actualización
-const CACHE_ASSETS = [
+const CACHE_VERSION = 'pizarra_voley-v3.1';   
   './',
   './index.html',
   './manifest.json',
