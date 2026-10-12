@@ -1,13 +1,14 @@
 /* Service Worker — Pizarra Táctica GEI Vóley */
-const CACHE_VERSION = 'pizarra_voley-v3.1';   
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+const CACHE_VERSION = 'pizarra_voley-v3.2';
+const BASE = '/pizar_voley/';
+const CACHE_ASSETS = [
+  BASE,
+  BASE + 'index.html',
+  BASE + 'manifest.json',
+  BASE + 'icon-192.png',
+  BASE + 'icon-512.png'
 ];
 
-/* Instalación: guarda los archivos base en caché */
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
@@ -19,7 +20,6 @@ self.addEventListener('install', event => {
   );
 });
 
-/* Activación: limpia cachés viejas */
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
@@ -30,7 +30,6 @@ self.addEventListener('activate', event => {
   );
 });
 
-/* Fetch: responde desde caché y actualiza en segundo plano */
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   if (!event.request.url.startsWith('http')) return;
