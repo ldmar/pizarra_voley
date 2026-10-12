@@ -1,10 +1,10 @@
 {
-  "id": "/pizar_voley/",
+  "id": "/pizarra_voley/",
   "name": "Pizarra Táctica GEI Vóley",
   "short_name": "Pizarra GEI",
   "description": "Pizarra táctica interactiva para el club GEI Vóley de Ituzaingó.",
-  "start_url": "/pizar_voley/index.html",
-  "scope": "/pizar_voley/",
+  "start_url": "/pizarra_voley/index.html",
+  "scope": "/pizarra_voley/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0a0f18",
@@ -13,19 +13,19 @@
   "categories": ["sports", "education"],
   "icons": [
     {
-      "src": "/pizar_voley/icon-192.png",
+      "src": "/pizarra_voley/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/pizar_voley/icon-512.png",
+      "src": "/pizarra_voley/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/pizar_voley/icon-512.png",
+      "src": "/pizarra_voley/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
