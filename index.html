@@ -1,18 +1,15 @@
-<!--
-  ============================================================
-  PIZARRA TÁCTICA · GEI VÓLEY
-  Desarrollado por Oh my goch! · consultoría big data & IA
-  https://webohmygoch.onrender.com/
-  ------------------------------------------------------------
-  © 2026 Oh my goch! · Todos los derechos reservados.
-  Prohibida la reproducción o modificación sin autorización.
-  ============================================================
--->
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="/pizar_voley/manifest.json">
+<meta name="theme-color" content="#ff8a3d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pizarra GEI">
+<link rel="icon" type="image/png" sizes="192x192" href="/pizar_voley/icon-192.png">
+<link rel="apple-touch-icon" href="/pizar_voley/icon-192.png">
 <title>Pizarra Táctica · GEI Vóley</title>
 <style>
   :root{
@@ -22,22 +19,15 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
-  body{
-    background:var(--bg);color:var(--text);
+  body{background:var(--bg);color:var(--text);
     font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;
-    -webkit-tap-highlight-color:transparent;overscroll-behavior:none;
-  }
+    -webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 
-  .app{
-    display:grid;
-    grid-template-columns:260px minmax(0,1fr) 370px;
-    height:100vh;height:100dvh;
-    transition:grid-template-columns .25s ease;
-  }
+  .app{display:grid;grid-template-columns:260px minmax(0,1fr) 370px;
+    height:100vh;height:100dvh;transition:grid-template-columns .25s ease}
   .app.focus{grid-template-columns:minmax(0,1fr) 340px}
   .app.focus .notes{border-left:none}
 
-  /* SIDEBAR */
   .sidebar{background:var(--panel);border-right:1px solid var(--line);
     display:flex;flex-direction:column;overflow:hidden;min-width:0}
   .brand{display:flex;align-items:center;gap:10px;padding:12px 14px 10px;
@@ -71,14 +61,26 @@
   .sidebar-body::-webkit-scrollbar-thumb{background:#2a3a52;border-radius:3px}
 
   .cat-title{font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;
-    color:var(--muted);padding:12px 14px 5px;font-weight:700}
+    color:var(--muted);padding:12px 14px 5px;font-weight:700;
+    display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .cat-title .cat-count{font-size:8.5px;background:#1d2a3f;color:#7db4ff;
+    padding:1px 6px;border-radius:8px;letter-spacing:.5px}
   .tac-btn{display:block;width:100%;text-align:left;background:transparent;
     border:1px solid transparent;color:#c4d2e4;font-size:12px;line-height:1.35;
     padding:8px 12px;border-radius:8px;cursor:pointer;transition:.15s;
-    font-family:inherit;border-left:3px solid transparent}
+    font-family:inherit;border-left:3px solid transparent;
+    display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .tac-btn .tac-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tac-btn .tac-del{background:transparent;border:none;color:#6c7f99;
+    cursor:pointer;font-size:14px;padding:0 4px;line-height:1;border-radius:4px;
+    transition:.15s;flex-shrink:0}
+  .tac-btn .tac-del:hover{color:#ff6b35;background:rgba(255,107,53,.15)}
   .tac-btn:hover{background:#1b2739;color:#fff}
   .tac-btn.active{background:linear-gradient(90deg,rgba(255,138,61,.16),rgba(255,138,61,.04));
     border-left-color:var(--accent);color:#fff;font-weight:600}
+
+  .nav-empty{padding:8px 14px;font-size:11px;color:#5a7a9a;
+    line-height:1.5;font-style:italic}
 
   .tool-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;padding:0 10px}
   .tool-btn{background:#0e1725;border:1px solid var(--line);color:#b9c9dd;
@@ -100,21 +102,22 @@
   .ghost-btn{display:block;width:calc(100% - 20px);margin:0 auto;
     background:#182335;border:1px solid var(--line);color:#c4d2e4;
     padding:8px 12px;border-radius:8px;font-size:11.5px;cursor:pointer;
-    font-family:inherit;transition:.15s;font-weight:600}
+    font-family:inherit;transition:.15s;font-weight:600;text-align:left}
   .ghost-btn:hover{background:#22314a;color:#fff;border-color:#38507a}
   .ghost-btn + .ghost-btn{margin-top:5px}
+  .ghost-btn.primary{background:linear-gradient(140deg,#ff8a3d,#ff6b35);
+    color:#1a0d04;border-color:var(--accent);font-weight:800;
+    box-shadow:0 3px 12px rgba(255,107,53,.25);text-align:center}
+  .ghost-btn.primary:hover{transform:translateY(-1px)}
 
   .hint{margin:12px 14px 0;padding:10px 12px;
     background:rgba(255,138,61,.08);border:1px solid rgba(255,138,61,.25);
     border-radius:8px;font-size:11px;line-height:1.5;color:#e8c9a8}
   .hint b{color:var(--accent)}
 
-  .sidebar-footer{
-    flex-shrink:0;
-    border-top:1px solid var(--line);
+  .sidebar-footer{flex-shrink:0;border-top:1px solid var(--line);
     padding:10px 14px 12px;
-    background:linear-gradient(180deg, rgba(255,138,61,0) 0%, rgba(255,138,61,.04) 100%);
-  }
+    background:linear-gradient(180deg, rgba(255,138,61,0) 0%, rgba(255,138,61,.04) 100%)}
   .omg-credit{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
   .omg-credit .omg-logo{font-size:13px;font-weight:800;letter-spacing:.2px;
     color:#e8eef7;text-decoration:none;display:inline-flex;align-items:baseline;gap:3px;
@@ -141,6 +144,8 @@
     text-transform:uppercase;padding:3px 9px;border-radius:20px}
   .phase-pill.free{background:rgba(59,130,246,.14);color:#7db4ff;
     border-color:rgba(59,130,246,.4)}
+  .phase-pill.saved{background:rgba(62,201,138,.14);color:#3ec98a;
+    border-color:rgba(62,201,138,.4)}
   .ghost{background:#1d2a3f;border:1px solid #2f4a6e;color:#e8eef7;
     padding:9px 14px;border-radius:10px;font-size:12px;font-weight:600;
     cursor:pointer;font-family:inherit;white-space:nowrap;transition:.15s;
@@ -148,44 +153,28 @@
   .ghost:hover{background:#26374f;color:#fff;border-color:var(--accent);
     box-shadow:0 4px 16px rgba(255,138,61,.25)}
 
-  .btn-menu{
-    display:none;
-    background:#1d2a3f;border:1px solid #2f4a6e;color:#e8eef7;
+  .btn-menu{display:none;background:#1d2a3f;border:1px solid #2f4a6e;color:#e8eef7;
     width:42px;height:42px;border-radius:10px;cursor:pointer;
     font-size:20px;font-family:inherit;font-weight:700;
     align-items:center;justify-content:center;
     transition:.15s;flex-shrink:0;
-    box-shadow:0 2px 10px rgba(0,0,0,.25);
-    line-height:1;
-  }
+    box-shadow:0 2px 10px rgba(0,0,0,.25);line-height:1}
   .btn-menu:hover{background:#26374f;border-color:var(--accent)}
   .btn-menu:active{transform:scale(.95)}
 
-  .drawer-overlay{
-    position:fixed;inset:0;background:rgba(0,0,0,.6);
+  .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);
     opacity:0;visibility:hidden;transition:.25s;
-    z-index:900;backdrop-filter:blur(2px);
-  }
+    z-index:900;backdrop-filter:blur(2px)}
   .drawer-overlay.show{opacity:1;visibility:visible}
 
-  .court-wrap{
-    position:relative;
-    flex:1;
-    min-height:0;
-    min-width:0;
-    overflow:hidden;
-    padding:8px;
-  }
-  #court{
-    position:absolute;
-    top:50%;left:50%;
+  .court-wrap{position:relative;flex:1;min-height:0;min-width:0;
+    overflow:hidden;padding:8px}
+  #court{position:absolute;top:50%;left:50%;
     transform:translate(-50%,-50%);
-    display:block;
-    touch-action:none;user-select:none;-webkit-user-select:none;
+    display:block;touch-action:none;user-select:none;-webkit-user-select:none;
     cursor:crosshair;
     filter:drop-shadow(0 6px 22px rgba(0,0,0,.5));
-    border-radius:8px;
-  }
+    border-radius:8px}
   #court.tool-erase{cursor:cell}
   #court.tool-dot{cursor:copy}
 
@@ -259,18 +248,19 @@
     padding:16px;backdrop-filter:blur(3px)}
   .modal-overlay.show{display:flex}
   .modal{background:var(--panel);border:1px solid var(--line);
-    border-radius:14px;padding:18px;width:100%;max-width:360px;
+    border-radius:14px;padding:18px;width:100%;max-width:400px;
     box-shadow:0 20px 60px rgba(0,0,0,.6)}
   .modal h3{font-size:14px;margin-bottom:14px;color:#fff;
     display:flex;align-items:center;gap:8px}
   .field{margin-bottom:12px}
   .field label{display:block;font-size:10.5px;letter-spacing:1px;
     text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:700}
-  .field input{width:100%;background:#0e1725;border:1px solid var(--line);
+  .field input, .field select, .field textarea{
+    width:100%;background:#0e1725;border:1px solid var(--line);
     color:#fff;padding:10px 12px;border-radius:8px;font-size:14px;
-    font-family:inherit;outline:none;transition:.15s}
-  .field input:focus{border-color:var(--accent);
-    box-shadow:0 0 0 3px rgba(255,138,61,.15)}
+    font-family:inherit;outline:none;transition:.15s;resize:none}
+  .field input:focus, .field select:focus, .field textarea:focus{
+    border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,138,61,.15)}
   .modal-actions{display:flex;gap:8px;margin-top:16px}
   .modal-actions button{flex:1;padding:10px;border-radius:8px;border:none;
     font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;transition:.15s}
@@ -278,6 +268,8 @@
   .btn-cancel:hover{background:#26374f}
   .btn-save{background:linear-gradient(140deg,#ff8a3d,#ff6b35);color:#1a0d04}
   .btn-save:hover{transform:translateY(-1px)}
+  .btn-danger{background:#7f1d1d;color:#fecaca;border:1px solid #b91c1c!important}
+  .btn-danger:hover{background:#991b1b;color:#fff}
 
   .player circle{fill:var(--us);stroke:#dbeafe;stroke-width:2}
   .player.them circle{fill:var(--them);stroke:#fee2e2}
@@ -292,9 +284,7 @@
   .dot-figure{cursor:pointer;transition:filter .15s}
   .dot-figure:hover{filter:drop-shadow(0 0 6px rgba(255,255,255,.6))}
 
-  @media (min-width:901px){
-    .app.focus .sidebar{display:none}
-  }
+  @media (min-width:901px){ .app.focus .sidebar{display:none} }
 
   @media (max-width:1200px) and (min-width:901px) and (orientation:landscape){
     .app{grid-template-columns:210px minmax(0,1fr) 300px}
@@ -304,26 +294,14 @@
 
   @media (max-width:900px){
     .btn-menu{display:flex}
-    .app{
-      display:flex;
-      flex-direction:column;
-      height:100vh;
-      height:100dvh;
-      overflow:hidden;
-    }
-    .sidebar{
-      position:fixed;
-      top:0;left:0;bottom:0;
-      width:280px;
-      max-width:85vw;
-      z-index:1000;
+    .app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+    .sidebar{position:fixed;top:0;left:0;bottom:0;
+      width:280px;max-width:85vw;z-index:1000;
       transform:translateX(-100%);
       transition:transform .28s cubic-bezier(.4,0,.2,1);
       box-shadow:4px 0 24px rgba(0,0,0,.5);
-      display:flex !important;
-      border-right:1px solid var(--line);
-      padding-left:max(0px, env(safe-area-inset-left));
-    }
+      display:flex !important;border-right:1px solid var(--line);
+      padding-left:max(0px, env(safe-area-inset-left))}
     .sidebar.open{transform:translateX(0)}
     .stage{flex:1 1 auto;min-height:0;height:auto;overflow:hidden}
     .stage-head{padding:8px 12px 6px;gap:8px}
@@ -333,20 +311,14 @@
     .controls{padding:8px 12px 12px;gap:6px;flex-shrink:0}
     .ctrl-btn{padding:8px 12px;font-size:11px}
     .time{font-size:10px;min-width:30px}
-    .notes{
-      flex:0 0 auto;
-      max-height:38vh;
-      overflow-y:auto;
-      border-left:none;
-      border-top:1px solid var(--line);
-      padding:14px 12px 20px;
-    }
+    .notes{flex:0 0 auto;max-height:38vh;overflow-y:auto;
+      border-left:none;border-top:1px solid var(--line);
+      padding:14px 12px 20px}
     .notes h3{font-size:9.5px}
     .obj{font-size:11.5px;padding:10px}
     .nlist li,.role-list li{font-size:11px}
     .ghost{padding:8px 10px;font-size:11px}
   }
-
   @media (max-width:600px){
     .stage-head h2{font-size:14px}
     .stage-head p{font-size:10px}
@@ -357,7 +329,6 @@
     .sidebar{width:260px}
     .notes{max-height:35vh}
   }
-
   @media (max-width:400px){
     .stage-head h2{font-size:13px}
     .stage-head p{display:none}
@@ -366,7 +337,6 @@
     .sidebar{width:240px}
     .notes{max-height:32vh}
   }
-
   @media (max-width:900px) and (max-height:500px) and (orientation:landscape){
     .stage-head{padding:5px 10px 3px}
     .stage-head h2{font-size:13px}
@@ -381,7 +351,6 @@
     .obj{font-size:10.5px;padding:8px}
     .nlist li,.role-list li{font-size:10px}
   }
-
   @media (min-width:1600px){
     .app{grid-template-columns:320px minmax(0,1fr) 440px}
     .app.focus{grid-template-columns:minmax(0,1fr) 400px}
@@ -401,27 +370,16 @@
     .brand .logo .fallback small{font-size:9px}
     .mode-tab{font-size:13px;padding:10px 6px}
     .omg-credit .omg-logo{font-size:16px}
-    .omg-credit .omg-tagline{font-size:10px}
-    .omg-credit .omg-link{font-size:11px}
     .notes-credit .nc-logo{font-size:17px}
-    .notes-credit .nc-tag{font-size:10px}
-    .notes-credit .nc-link{font-size:12px}
   }
   @media (min-width:2200px){
     .app{grid-template-columns:380px minmax(0,1fr) 520px}
     .app.focus{grid-template-columns:minmax(0,1fr) 480px}
     .stage-head h2{font-size:26px}
     .stage-head p{font-size:16px}
-    .notes h3{font-size:13px}
-    .obj{font-size:16px}
-    .nlist li,.role-list li{font-size:15px}
     .brand .logo{width:64px;height:64px}
     .brand .logo .fallback{font-size:22px}
-    .brand-text h1{font-size:18px}
-    .omg-credit .omg-logo{font-size:20px}
-    .notes-credit .nc-logo{font-size:20px}
   }
-
   @supports(padding:max(0px)){
     .sidebar{padding-left:max(0px, env(safe-area-inset-left))}
     .notes{padding-right:max(0px, env(safe-area-inset-right))}
@@ -430,6 +388,7 @@
   }
 </style>
 </head>
+
 <body>
 <div class="app" id="app">
 
@@ -451,36 +410,45 @@
 
     <div class="sidebar-body">
       <nav id="nav"></nav>
-      <div id="drawPanel" style="display:none">
-        <div class="cat-title">Herramienta</div>
-        <div class="tool-grid">
-          <button class="tool-btn active" data-tool="path" title="Dibujar trayectoria">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-              <path d="M3 19 Q 7 4 21 11"/><path d="M16 7 L 21 11 L 17 15"/>
-            </svg><span>Trazo</span>
-          </button>
-          <button class="tool-btn" data-tool="dot" title="Colocar ficha / jugador">
-            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7.5"/></svg>
-            <span>Ficha</span>
-          </button>
-          <button class="tool-btn" data-tool="erase" title="Borrar elemento">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 20 L 9 15"/><path d="M7 17 L 15 9 L 20 14 L 15 19 Z"/><path d="M15 9 L 11 5 L 4 12 L 8 16"/>
-            </svg><span>Borrar</span>
-          </button>
-        </div>
-        <div class="cat-title">Color</div>
-        <div class="color-row" id="colorRow"></div>
-        <div class="cat-title">Acciones</div>
-        <button id="btnUndo" class="ghost-btn">↶ Deshacer último</button>
-        <button id="btnClear" class="ghost-btn" style="margin-top:5px">🗑 Limpiar toda la pizarra</button>
-        <div class="hint">
-          <b>Dibujá sobre la cancha</b> con el dedo o el mouse.<br>
-          <b>Trazo</b> = trayectoria. <b>Ficha</b> = jugador (tocala después para editarla).<br>
-          <b>💡 Movimiento:</b> poné una ficha, después trazá <b>empezando sobre la ficha</b> para que se mueva con la animación.
-        </div>
+    <div id="drawPanel" style="display:none">
+      <div class="cat-title">Herramienta</div>
+      <div class="tool-grid">
+        <button class="tool-btn active" data-tool="path">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M3 19 Q 7 4 21 11"/><path d="M16 7 L 21 11 L 17 15"/>
+          </svg><span>Trazo</span>
+        </button>
+        <button class="tool-btn" data-tool="dot">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7.5"/></svg>
+          <span>Ficha</span>
+        </button>
+        <button class="tool-btn" data-tool="erase">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 20 L 9 15"/><path d="M7 17 L 15 9 L 20 14 L 15 19 Z"/><path d="M15 9 L 11 5 L 4 12 L 8 16"/>
+          </svg><span>Borrar</span>
+        </button>
+      </div>
+      <div class="cat-title">Color</div>
+      <div class="color-row" id="colorRow"></div>
+
+      <div class="cat-title">Acciones</div>
+      <button id="btnUndo" class="ghost-btn">↶ Deshacer último</button>
+      <button id="btnClear" class="ghost-btn" style="margin-top:5px">🗑 Limpiar toda la pizarra</button>
+
+      <div class="cat-title">Guardar y compartir</div>
+      <button id="btnSaveTactic" class="ghost-btn primary">💾 Guardar como táctica</button>
+      <button id="btnExport" class="ghost-btn">📤 Exportar mis tácticas</button>
+      <button id="btnImport" class="ghost-btn">📥 Importar tácticas</button>
+      <button id="btnLoadClub" class="ghost-btn">☁️ Cargar tácticas del club</button>
+      <input type="file" id="fileImport" accept=".json,application/json" style="display:none">
+
+      <div class="hint">
+        <b>Dibujá sobre la cancha</b> con el dedo o el mouse.<br>
+        <b>Trazo</b> = trayectoria. <b>Ficha</b> = jugador (tocala después para editarla).<br>
+        <b>💡 Movimiento:</b> empezá el trazo <b>sobre la ficha</b> para que se mueva.
       </div>
     </div>
+</div>
 
     <div class="sidebar-footer">
       <div class="omg-credit">
@@ -523,6 +491,7 @@
 
 <div class="drawer-overlay" id="drawerOverlay"></div>
 
+<!-- Modal editar ficha -->
 <div class="modal-overlay" id="editModal">
   <div class="modal">
     <h3>✏️ Editar jugador</h3>
@@ -545,16 +514,92 @@
   </div>
 </div>
 
+<!-- Modal guardar táctica -->
+<div class="modal-overlay" id="saveModal">
+  <div class="modal">
+    <h3>💾 Guardar táctica</h3>
+    <div class="field">
+      <label for="saveName">Nombre de la táctica *</label>
+      <input type="text" id="saveName" maxlength="40" placeholder="Ej: Ataque 4 con cruce">
+    </div>
+    <div class="field">
+      <label for="saveCat">Categoría</label>
+      <select id="saveCat">
+        <option value="Saque">Saque</option>
+        <option value="Recepción">Recepción</option>
+        <option value="Ataque" selected>Ataque</option>
+        <option value="Bloqueo">Bloqueo</option>
+        <option value="Defensa">Defensa</option>
+        <option value="Transición">Transición</option>
+        <option value="Sistemas">Sistemas</option>
+        <option value="Otro">Otro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="saveDesc">Descripción corta (opcional)</label>
+      <textarea id="saveDesc" rows="2" maxlength="120" placeholder="Ej: Jugada para atacar por zona 4 después del cruce"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnSaveCancel">Cancelar</button>
+      <button class="btn-save" id="btnSaveConfirm">Guardar</button>
+    </div>
+  </div>
+</div>
+
+
+
 <script>
+
 /* ============================================================
-   GEOMETRÍA DE LA CANCHA
+   VERIFICACIÓN DEFENSIVA DE IDs
+   Crea stubs si falta algo y reemplaza onclick por un helper seguro
+   ============================================================ */
+(function(){
+  const CRITICAL_IDS = [
+    'btnSaveTactic','btnExport','btnImport','btnLoadClub','fileImport',
+    'btnSaveCancel','btnSaveConfirm','btnEditCancel','btnEditSave',
+    'btnPlay','btnReset','btnFocus','btnUndo','btnClear','btnMenu',
+    'editModal','saveModal','clubLogo','nav','drawPanel',
+    'colorRow','editColorRow','court','courtWrap','notes'
+  ];
+  CRITICAL_IDS.forEach(id=>{
+    if(!document.getElementById(id)){
+      console.error('❌ FALTA el elemento #' + id + ' en tu HTML. La app va a fallar.');
+      // Crear stub temporal para no romper
+      const stub = document.createElement('div');
+      stub.id = id;
+      stub.style.display = 'none';
+      document.body.appendChild(stub);
+    }
+  });
+})();
+
+/* Helper seguro para asignar onclick */
+window.safeOn = function(id, handler){
+  const el = document.getElementById(id);
+  if(!el){
+    console.warn('[safeOn] Falta #' + id + ' — se ignora la asignación');
+    return;
+  }
+  el.onclick = handler;
+};
+window.safeAdd = function(id, event, handler){
+  const el = document.getElementById(id);
+  if(!el){
+    console.warn('[safeAdd] Falta #' + id + ' — se ignora la asignación');
+    return;
+  }
+  el.addEventListener(event, handler);
+};
+
+/* ============================================================
+   GEOMETRÍA
    ============================================================ */
 const S = 40, MX = 55, MY = 60;
 const CW = 9 * S, CL = 18 * S;
 const X = m => MX + m * S;
 const Y = m => MY + m * S;
 const NS = 'http://www.w3.org/2000/svg';
-
 const svg = document.getElementById('court');
 
 /* ============================================================
@@ -572,8 +617,13 @@ let drawTool = 'path';
 let drawColor = '#ffd23f';
 let isDrawing = false;
 let editingStrokeIndex = -1;
+let currentSavedId = null;  // id de la táctica guardada actual, si aplica
 
 const COLORS = ['#ffd23f','#3b82f6','#ef4444','#22c55e','#ffffff','#ff8a3d','#a855f7','#ec4899'];
+const STORAGE_KEY = 'gei-pizarra-tacticas-v1';
+
+let savedTactics = [];
+let clubTactics = [];
 
 /* ============================================================
    HELPERS
@@ -583,27 +633,36 @@ function el(tag, attrs){
   if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]);
   return e;
 }
-function clearNode(n){
-  if(!n) return;
-  while(n.firstChild) n.removeChild(n.firstChild);
-}
+function clearNode(n){ if(!n) return; while(n.firstChild) n.removeChild(n.firstChild); }
 function getLayer(id){ return document.getElementById(id) || null; }
+function uid(prefix){ return (prefix||'id') + '_' + Date.now() + '_' + Math.random().toString(36).substr(2,6); }
+function deepCopy(o){ return JSON.parse(JSON.stringify(o)); }
 
 /* ============================================================
-   ESCUDO DEL CLUB
+   PERSISTENCIA LOCAL
+   ============================================================ */
+function loadSavedFromStorage(){
+  try{
+    const data = localStorage.getItem(STORAGE_KEY);
+    savedTactics = data ? JSON.parse(data) : [];
+  }catch(_){ savedTactics = []; }
+}
+function persistSaved(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(savedTactics)); }catch(_){}
+}
+
+/* ============================================================
+   ESCUDO
    ============================================================ */
 function setupClubLogo(){
   const logoDiv = document.getElementById('clubLogo');
   if(!logoDiv) return;
-
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
   fileInput.accept = 'image/*';
   fileInput.style.display = 'none';
   document.body.appendChild(fileInput);
-
   logoDiv.addEventListener('click', ()=> fileInput.click());
-
   fileInput.addEventListener('change', (e)=>{
     const file = e.target.files && e.target.files[0];
     if(!file) return;
@@ -618,7 +677,6 @@ function setupClubLogo(){
     };
     reader.readAsDataURL(file);
   });
-
   try{
     const saved = localStorage.getItem('gei-logo');
     if(saved){
@@ -637,14 +695,11 @@ function setupClubLogo(){
 function buildCourt(){
   if(courtBuilt) return;
   if(!svg) return;
-
   const defs = el('defs');
-
   const pat = el('pattern', {id:'netpat', width:'8', height:'8', patternUnits:'userSpaceOnUse'});
   pat.appendChild(el('rect', {width:'8', height:'8', fill:'#0e1725'}));
   pat.appendChild(el('path', {d:'M0 0 L8 8 M8 0 L0 8', stroke:'#5b7ba3', 'stroke-width':'1', opacity:'.55'}));
   defs.appendChild(pat);
-
   ['#ffd23f','#8aa8d0','#ff8a3d','#7dd3fc'].forEach((c,i)=>{
     const m = el('marker', {id:'arw'+i, viewBox:'0 0 10 10', refX:'8', refY:'5',
       markerWidth:'5', markerHeight:'5', orient:'auto-start-reverse'});
@@ -659,26 +714,23 @@ function buildCourt(){
 
   const theirZ = [[4,7.5,7.5],[3,4.5,7.5],[2,1.5,7.5],[5,7.5,3.0],[6,4.5,3.0],[1,1.5,3.0]];
   theirZ.forEach(([n,x,y])=>{
-    const t = el('text', {x:X(x), y:Y(y), fill:'#ffffff', opacity:'.13',
+    const t = el('text', {x:X(x), y:Y(y), fill:'#fff', opacity:'.13',
       'font-size':'30', 'font-weight':'800', 'text-anchor':'middle',
       'dominant-baseline':'middle', 'font-family':'Segoe UI, sans-serif'});
-    t.textContent = n;
-    g.appendChild(t);
+    t.textContent = n; g.appendChild(t);
   });
   const ourZ = [[4,1.5,13.5],[3,4.5,13.5],[2,7.5,13.5],[5,1.5,16.5],[6,4.5,16.5],[1,7.5,16.5]];
   ourZ.forEach(([n,x,y])=>{
-    const t = el('text', {x:X(x), y:Y(y), fill:'#ffffff', opacity:'.13',
+    const t = el('text', {x:X(x), y:Y(y), fill:'#fff', opacity:'.13',
       'font-size':'30', 'font-weight':'800', 'text-anchor':'middle',
       'dominant-baseline':'middle', 'font-family':'Segoe UI, sans-serif'});
-    t.textContent = n;
-    g.appendChild(t);
+    t.textContent = n; g.appendChild(t);
   });
 
   g.appendChild(el('line', {x1:MX, y1:Y(6), x2:MX+CW, y2:Y(6),
     stroke:'#7fa6d0', 'stroke-width':'2', 'stroke-dasharray':'10 8', opacity:'.7'}));
   g.appendChild(el('line', {x1:MX, y1:Y(12), x2:MX+CW, y2:Y(12),
     stroke:'#7fa6d0', 'stroke-width':'2', 'stroke-dasharray':'10 8', opacity:'.7'}));
-
   g.appendChild(el('rect', {x:MX, y:MY, width:CW, height:CL, fill:'none',
     stroke:'#e6eef8', 'stroke-width':'3', opacity:'.85'}));
 
@@ -691,7 +743,6 @@ function buildCourt(){
     stroke:'#e6eef8', 'stroke-width':'2.5'}));
 
   svg.appendChild(g);
-
   svg.appendChild(el('g', {id:'targetLayer'}));
   svg.appendChild(el('g', {id:'arrowLayer'}));
   svg.appendChild(el('g', {id:'playerLayer'}));
@@ -746,7 +797,7 @@ function arrowPath(a, b, curve){
 }
 
 /* ============================================================
-   TÁCTICAS PREDEFINIDAS
+   TÁCTICAS BASE (las 17 originales) — dejo 5 de ejemplo
    ============================================================ */
 const THEM_SR = {1:[1.8,2.0], 2:[1.8,7.8], 3:[4.5,7.8], 4:[7.2,7.8], 5:[7.2,2.0], 6:[4.5,1.3]};
 const THEM_AT = {1:[7.2,2.0], 2:[1.8,7.9], 3:[3.6,7.9], 4:[6.6,7.9], 5:[1.8,2.0], 6:[4.5,1.5]};
@@ -1407,19 +1458,20 @@ const TACTICS = [
 ];
 
 /* ============================================================
-   CARGA DE TÁCTICA
+   CARGA DE TÁCTICA PREDEFINIDA
    ============================================================ */
 function loadTactic(tac){
   if(!tac) return;
   freeMode = false;
   cur = tac;
+  currentSavedId = null;
   buildCourt();
 
   document.getElementById('tacName').textContent = tac.name;
   document.getElementById('tacSub').textContent  = tac.sub || '';
 
   const pill = document.getElementById('phasePill');
-  pill.classList.remove('free');
+  pill.classList.remove('free','saved');
   pill.style.display = tac.phases ? 'inline-block' : 'none';
 
   clearTacticLayers();
@@ -1429,9 +1481,7 @@ function loadTactic(tac){
     const tl = getLayer('targetLayer');
     if(tl){
       const [x,y,w,h] = tac.target;
-      tl.appendChild(
-        el('rect', {x:X(x), y:Y(y), width:w*S, height:h*S, rx:6, class:'target-zone'})
-      );
+      tl.appendChild(el('rect', {x:X(x), y:Y(y), width:w*S, height:h*S, rx:6, class:'target-zone'}));
     }
   }
 
@@ -1445,7 +1495,6 @@ function loadTactic(tac){
         'stroke-dasharray': st.dash, 'stroke-linecap':'round',
         'marker-end':'url(#'+st.marker+')', opacity: st.opacity
       });
-      if(a.dash && !st.dash) p.setAttribute('stroke-dasharray','9 7');
       al.appendChild(p);
     });
   }
@@ -1461,8 +1510,7 @@ function loadTactic(tac){
         const g = el('g', {class:'player '+side+(isKey?' key':'')});
         g.appendChild(el('circle', {r:15}));
         const tx = el('text');
-        tx.textContent = n;
-        g.appendChild(tx);
+        tx.textContent = n; g.appendChild(tx);
         const pos = src[n];
         g.setAttribute('transform', `translate(${X(pos[0])},${Y(pos[1])})`);
         pl.appendChild(g);
@@ -1494,11 +1542,49 @@ function loadTactic(tac){
 }
 
 /* ============================================================
+   CARGA DE TÁCTICA GUARDADA (pizarra libre con strokes)
+   ============================================================ */
+function loadSavedTactic(tac){
+  freeMode = true;
+  cur = null;
+  currentSavedId = tac.id;
+  playing = false;
+  tNow = 0;
+  buildCourt();
+
+  document.querySelectorAll('.mode-tab').forEach(b=>{
+    b.classList.toggle('active', b.dataset.mode === 'free');
+  });
+  document.getElementById('nav').style.display = 'none';
+  document.getElementById('drawPanel').style.display = 'block';
+
+  document.getElementById('tacName').textContent = tac.name;
+  document.getElementById('tacSub').textContent = tac.sub || (tac.source === 'club' ? 'Táctica del club' : 'Mi táctica');
+
+  const pill = document.getElementById('phasePill');
+  pill.classList.remove('free');
+  pill.classList.add('saved');
+  pill.style.display = 'inline-block';
+  pill.textContent = tac.source === 'club' ? '☁️ Club' : '⭐ Guardada';
+
+  clearTacticLayers();
+  clearNode(getLayer('drawLayer'));
+
+  strokes = deepCopy(tac.strokes || []);
+  currentStroke = null;
+
+  recomputeTiming();
+  if(strokes.length === 0) dur = 0.6;
+  renderFreeNotes();
+  updatePlayBtn();
+  render();
+}
+
+/* ============================================================
    RENDER TÁCTICA
    ============================================================ */
 function renderTactic(){
   if(!cur) return;
-
   ['us','them'].forEach(side=>{
     const src = cur[side];
     if(!src) return;
@@ -1512,40 +1598,35 @@ function renderTactic(){
       }
     });
   });
-
   if(els.ball && cur.ball){
     const p = interp(cur.ball, tNow, true);
     if(p) els.ball.setAttribute('transform', `translate(${X(p[0])},${Y(p[1])})`);
   }
-
   if(cur.phases){
     let label = cur.phases[0][1];
     for(const [tm, lb] of cur.phases){ if(tNow >= tm) label = lb; }
-    document.getElementById('phasePill').textContent = label;
+    const pill = document.getElementById('phasePill');
+    if(pill && !pill.classList.contains('saved')) pill.textContent = label;
   }
 }
 
 /* ============================================================
-   DIBUJO PIZARRA LIBRE
+   DIBUJO
    ============================================================ */
 function svgPoint(e){
   const pt = svg.createSVGPoint();
   pt.x = e.clientX; pt.y = e.clientY;
   return pt.matrixTransform(svg.getScreenCTM().inverse());
 }
-
 function computeLengths(s){
   if(s.type !== 'path') return;
-  const pts = s.points;
-  const cum = [0];
-  let total = 0;
+  const pts = s.points, cum = [0]; let total = 0;
   for(let i=1;i<pts.length;i++){
     total += Math.hypot(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]);
     cum.push(total);
   }
   s.cum = cum; s.len = total;
 }
-
 function pointsAtProgress(s, p){
   const pts = s.points, cum = s.cum;
   if(!pts || pts.length === 0) return [];
@@ -1557,24 +1638,17 @@ function pointsAtProgress(s, p){
     else {
       const segLen = cum[i] - cum[i-1];
       const u = segLen > 0 ? (target - cum[i-1]) / segLen : 0;
-      out.push([
-        pts[i-1][0] + (pts[i][0]-pts[i-1][0])*u,
-        pts[i-1][1] + (pts[i][1]-pts[i-1][1])*u
-      ]);
+      out.push([pts[i-1][0] + (pts[i][0]-pts[i-1][0])*u,
+                pts[i-1][1] + (pts[i][1]-pts[i-1][1])*u]);
       break;
     }
   }
   return out;
 }
-
 function smoothPath(pts){
   if(!pts || !pts.length) return '';
-  if(pts.length === 1){
-    return `M ${pts[0][0]} ${pts[0][1]} L ${pts[0][0]+0.5} ${pts[0][1]}`;
-  }
-  if(pts.length === 2){
-    return `M ${pts[0][0]} ${pts[0][1]} L ${pts[1][0]} ${pts[1][1]}`;
-  }
+  if(pts.length === 1) return `M ${pts[0][0]} ${pts[0][1]} L ${pts[0][0]+0.5} ${pts[0][1]}`;
+  if(pts.length === 2) return `M ${pts[0][0]} ${pts[0][1]} L ${pts[1][0]} ${pts[1][1]}`;
   let d = `M ${pts[0][0]} ${pts[0][1]}`;
   for(let i=1;i<pts.length-1;i++){
     const mx = (pts[i][0] + pts[i+1][0])/2;
@@ -1584,16 +1658,13 @@ function smoothPath(pts){
   d += ` L ${pts[pts.length-1][0]} ${pts[pts.length-1][1]}`;
   return d;
 }
-
 function distToSegment(px, py, a, b){
   const dx = b[0]-a[0], dy = b[1]-a[1];
   const len2 = dx*dx + dy*dy;
   let u = len2 > 0 ? ((px-a[0])*dx + (py-a[1])*dy)/len2 : 0;
   u = Math.max(0, Math.min(1, u));
-  const cx = a[0] + u*dx, cy = a[1] + u*dy;
-  return Math.hypot(px-cx, py-cy);
+  return Math.hypot(px - (a[0] + u*dx), py - (a[1] + u*dy));
 }
-
 function hitTest(x, y){
   let best = -1, bestD = Infinity;
   strokes.forEach((s, i)=>{
@@ -1609,7 +1680,6 @@ function hitTest(x, y){
   });
   return best;
 }
-
 function recomputeTiming(){
   let t = 0;
   strokes.forEach(s=>{
@@ -1626,17 +1696,12 @@ function recomputeTiming(){
   }
 }
 
-/* ============================================================
-   RENDER DE UN TRAZO (solo la línea)
-   ============================================================ */
 function renderPath(s, progress, layer){
   if(progress <= 0) return;
-
   const pts = pointsAtProgress(s, progress);
   if(pts.length === 0) return;
   const d = smoothPath(pts);
   if(!d) return;
-
   const path = el('path', {
     d, fill:'none', stroke:s.color, 'stroke-width':4.5,
     'stroke-linecap':'round', 'stroke-linejoin':'round', opacity:.98
@@ -1644,17 +1709,14 @@ function renderPath(s, progress, layer){
   path.style.filter = `drop-shadow(0 0 5px ${s.color}66)`;
   layer.appendChild(path);
 
-  // Anillo indicador si el trazo mueve una ficha
   if(s.attachedTo && s.points.length > 0){
     const start = s.points[0];
-    const ring = el('circle', {
+    layer.appendChild(el('circle', {
       cx: start[0], cy: start[1], r: 22,
       fill:'none', stroke: s.color, 'stroke-width': 2,
       'stroke-dasharray': '4 5', opacity: 0.65
-    });
-    layer.appendChild(ring);
+    }));
   }
-
   if(progress >= 0.94 && s.points.length >= 2){
     const n = s.points.length;
     const [x1,y1] = s.points[n-2];
@@ -1666,57 +1728,36 @@ function renderPath(s, progress, layer){
     const ay = y2 + size*Math.sin(back - 0.45);
     const bx = x2 + size*Math.cos(back + 0.45);
     const by = y2 + size*Math.sin(back + 0.45);
-    const tri = el('path', {
+    layer.appendChild(el('path', {
       d: `M ${x2} ${y2} L ${ax} ${ay} L ${bx} ${by} Z`,
       fill: s.color, opacity: Math.min(1, (progress - 0.94) / 0.06)
-    });
-    layer.appendChild(tri);
+    }));
   }
 }
 
-/* ============================================================
-   RENDER DE UNA FICHA (permite moverla)
-   ============================================================ */
 function renderFicha(s, cx, cy, layer, progress){
   const p = Math.max(0, Math.min(1, progress));
   const scale = 0.55 + 0.45 * p;
   const g = el('g', {class:'dot-figure', opacity: p});
-
-  g.appendChild(el('circle', {cx:cx, cy:cy, r:16*scale,
-    fill:s.color, stroke:'#ffffff', 'stroke-width':2.5, opacity:.95}));
-
-  if(s.number !== undefined && s.number !== ''){
-    const numText = el('text', {
-      x: cx, y: cy,
-      'font-size': 13, 'font-weight': 900,
-      'text-anchor': 'middle', 'dominant-baseline': 'central',
-      fill: '#0a0f18', 'font-family': 'Segoe UI, sans-serif',
-      'pointer-events': 'none'
-    });
-    numText.textContent = s.number;
-    g.appendChild(numText);
+  g.appendChild(el('circle', {cx, cy, r:16*scale, fill:s.color,
+    stroke:'#ffffff', 'stroke-width':2.5, opacity:.95}));
+  if(s.number){
+    const t = el('text', {x:cx, y:cy, 'font-size':13, 'font-weight':900,
+      'text-anchor':'middle', 'dominant-baseline':'central',
+      fill:'#0a0f18', 'font-family':'Segoe UI, sans-serif', 'pointer-events':'none'});
+    t.textContent = s.number; g.appendChild(t);
   }
-
-  if(s.name !== undefined && s.name !== ''){
-    const nameText = el('text', {
-      x: cx, y: cy + 26 * scale,
-      'font-size': 9, 'font-weight': 600,
-      'text-anchor': 'middle', 'dominant-baseline': 'hanging',
-      fill: '#ffffff', 'font-family': 'Segoe UI, sans-serif',
-      'paint-order': 'stroke',
-      stroke: '#000', 'stroke-width': 3, 'stroke-linejoin': 'round',
-      'pointer-events': 'none'
-    });
-    nameText.textContent = s.name;
-    g.appendChild(nameText);
+  if(s.name){
+    const t = el('text', {x:cx, y:cy + 26*scale, 'font-size':9, 'font-weight':600,
+      'text-anchor':'middle', 'dominant-baseline':'hanging',
+      fill:'#ffffff', 'font-family':'Segoe UI, sans-serif',
+      'paint-order':'stroke', stroke:'#000', 'stroke-width':3,
+      'stroke-linejoin':'round', 'pointer-events':'none'});
+    t.textContent = s.name; g.appendChild(t);
   }
-
   layer.appendChild(g);
 }
 
-/* ============================================================
-   RENDER PIZARRA LIBRE COMPLETA
-   ============================================================ */
 function renderFree(){
   const layer = getLayer('drawLayer');
   if(!layer) return;
@@ -1724,66 +1765,54 @@ function renderFree(){
 
   const all = currentStroke ? [...strokes, currentStroke] : strokes;
 
-  // 1) TRAZOS primero (van al fondo)
   all.forEach(s=>{
     if(s.type !== 'path') return;
     let p;
     if(s === currentStroke) p = 1;
-    else {
-      const span = Math.max(0.001, s.t1 - s.t0);
-      p = (tNow - s.t0) / span;
-    }
+    else { const span = Math.max(0.001, s.t1 - s.t0); p = (tNow - s.t0) / span; }
     if(p > 0) renderPath(s, Math.min(1, p), layer);
   });
 
-  // 2) FICHAS encima (pueden estar movidas por un trazo)
   all.forEach(s=>{
     if(s.type !== 'dot') return;
-
     const mover = all.find(t => t.type === 'path' && t.attachedTo === s.id);
-
-    let cx = s.x, cy = s.y;
-    let animP = 1;
-
+    let cx = s.x, cy = s.y, animP = 1;
     if(mover){
       let p;
-      if(mover === currentStroke) p = 1; // mientras se dibuja, la ficha sigue el dedo
-      else {
-        const span = Math.max(0.001, mover.t1 - mover.t0);
-        p = (tNow - mover.t0) / span;
-      }
+      if(mover === currentStroke) p = 1;
+      else { const span = Math.max(0.001, mover.t1 - mover.t0); p = (tNow - mover.t0) / span; }
       if(p > 0){
         animP = Math.max(0, Math.min(1, p));
         const pts = pointsAtProgress(mover, animP);
-        if(pts.length > 0){
-          cx = pts[pts.length-1][0];
-          cy = pts[pts.length-1][1];
-        }
+        if(pts.length > 0){ cx = pts[pts.length-1][0]; cy = pts[pts.length-1][1]; }
       }
     }
-
     renderFicha(s, cx, cy, layer, animP);
   });
 
   const pill = document.getElementById('phasePill');
   if(!pill) return;
-  pill.classList.add('free');
-  pill.style.display = 'inline-block';
-  if(strokes.length === 0){
-    pill.textContent = 'Pizarra libre · Dibujá una jugada';
-  } else if(tNow < dur - 0.01){
-    pill.textContent = 'Reproduciendo…';
+  if(currentSavedId){
+    pill.classList.add('saved');
+    pill.classList.remove('free');
+    const savedTac = savedTactics.find(t=>t.id===currentSavedId) || clubTactics.find(t=>t.id===currentSavedId);
+    pill.textContent = (savedTac && savedTac.source === 'club' ? '☁️ Club' : '⭐ Guardada');
   } else {
-    pill.textContent = `Jugada completa · ${strokes.length} elemento${strokes.length===1?'':'s'}`;
+    pill.classList.add('free');
+    pill.classList.remove('saved');
+    if(strokes.length === 0){
+      pill.textContent = 'Pizarra libre · Dibujá una jugada';
+    } else if(tNow < dur - 0.01){
+      pill.textContent = 'Reproduciendo…';
+    } else {
+      pill.textContent = `${strokes.length} elemento${strokes.length===1?'':'s'} · sin guardar`;
+    }
   }
 }
 
 function render(){
-  if(freeMode){
-    renderFree();
-  } else {
-    renderTactic();
-  }
+  if(freeMode) renderFree();
+  else renderTactic();
 
   const sc = document.getElementById('scrub');
   if(sc && document.activeElement !== sc){
@@ -1807,8 +1836,7 @@ function creditHTML(){
       <a href="https://webohmygoch.onrender.com/" target="_blank" rel="noopener" class="nc-link">
         webohmygoch.onrender.com
       </a>
-    </div>
-  `;
+    </div>`;
 }
 
 function renderTacticNotes(tac){
@@ -1817,9 +1845,7 @@ function renderTacticNotes(tac){
   html += `<h3>Objetivo</h3><div class="obj">${n.obj || ''}</div>`;
   if(n.roles && n.roles.length){
     html += `<h3>Roles</h3><ul class="role-list">`;
-    n.roles.forEach(([num, txt])=>{
-      html += `<li><span class="badge">${num}</span><span>${txt}</span></li>`;
-    });
+    n.roles.forEach(([num, txt])=>{ html += `<li><span class="badge">${num}</span><span>${txt}</span></li>`; });
     html += `</ul>`;
   }
   if(n.keys && n.keys.length){
@@ -1838,27 +1864,46 @@ function renderTacticNotes(tac){
 }
 
 function renderFreeNotes(){
+  const savedTac = currentSavedId ?
+    (savedTactics.find(t=>t.id===currentSavedId) || clubTactics.find(t=>t.id===currentSavedId)) : null;
+
   let html = '';
-  html += `<h3>Cómo usar la pizarra</h3>
-    <div class="obj">
-      <b>1.</b> Elegí <b>Ficha</b> y colocá los jugadores donde empiezan la jugada.<br><br>
-      <b>2.</b> Cambiá a <b>Trazo</b> y dibujá desde cada ficha hacia donde querés que se mueva.
-      Vas a ver un <b>anillo punteado</b> cuando el trazo esté enganchado a la ficha.<br><br>
-      <b>3.</b> Presioná <b>▶ Reproducir</b>: vas a ver las fichas deslizándose por sus trayectorias.<br><br>
-      <b>4.</b> Con <b>Deshacer</b> borrás el último; con <b>Limpiar</b> empezás de cero.
-    </div>`;
+  if(savedTac){
+    html += `<h3>${savedTac.source === 'club' ? '☁️ Táctica del club' : '⭐ Mi táctica'}</h3>
+      <div class="obj">
+        <b>${savedTac.name}</b><br>
+        <span style="color:#8ba0bd;font-size:11px">Categoría: ${savedTac.cat || 'Sin categoría'}</span>
+        ${savedTac.sub ? `<br><br>${savedTac.sub}` : ''}
+      </div>`;
+    if(savedTac.source !== 'club'){
+      html += `<div style="margin-top:10px">
+        <button class="ghost-btn" id="btnDeleteCurrent" style="width:100%">🗑 Borrar esta táctica</button>
+      </div>`;
+    }
+  } else {
+    html += `<h3>Cómo usar la pizarra</h3>
+      <div class="obj">
+        <b>1.</b> Colocá fichas con la herramienta <b>Ficha</b>.<br><br>
+        <b>2.</b> Cambiá a <b>Trazo</b> y empezá a dibujar <b>sobre una ficha</b> para moverla.<br><br>
+        <b>3.</b> Tocá <b>💾 Guardar</b> para que quede en "Mis tácticas".<br><br>
+        <b>4.</b> Compartí con <b>📤 Exportar</b> o cargá las del club con <b>☁️ Cargar</b>.
+      </div>`;
+  }
+
   html += `<h3>Recomendaciones</h3>
     <ul class="nlist good">
-      <li>Primero colocá <b>todas las fichas</b>, después los trazos.</li>
-      <li>Empezá el trazo <b>sobre la ficha</b> para que se mueva con la animación.</li>
-      <li>Usá <b>colores distintos por jugador</b>.</li>
-      <li>Los trazos sin ficha funcionan como <b>trayectoria de pelota</b>.</li>
-      <li>Reproducí en <b>cámara lenta</b> con la barra de tiempo.</li>
-      <li>Podés <b>subir el escudo del club</b> tocando el logo GEI.</li>
+      <li>Dibujá <b>una acción por vez</b>.</li>
+      <li>Un color distinto por jugador.</li>
+      <li>Guardá con un nombre claro: "Ataque 4 con cruce", "Recepción W".</li>
+      <li>Exportá tus tácticas antes de cambiar de dispositivo.</li>
     </ul>`;
+
   html += legendHTML();
   html += creditHTML();
   document.getElementById('notes').innerHTML = html;
+
+  const btnDel = document.getElementById('btnDeleteCurrent');
+  if(btnDel) btnDel.onclick = ()=> deleteCurrentSaved();
 }
 
 function legendHTML(){
@@ -1878,8 +1923,7 @@ function legendHTML(){
 function loop(ts){
   if(playing){
     if(!lastTs) lastTs = ts;
-    const dt = ((ts - lastTs)/1000);
-    tNow += dt;
+    tNow += ((ts - lastTs)/1000);
     if(tNow >= dur){ tNow = dur; playing = false; updatePlayBtn(); }
     render();
   }
@@ -1895,52 +1939,36 @@ function updatePlayBtn(){
    CAMBIO DE MODO
    ============================================================ */
 function setMode(mode){
-  if(window.innerWidth <= 900 && window.__closeDrawer){
-    window.__closeDrawer();
-  }
-
+  if(window.innerWidth <= 900 && window.__closeDrawer) window.__closeDrawer();
   if(mode === 'free'){
-    freeMode = true;
-    cur = null;
-    playing = false;
-    tNow = 0;
-
+    freeMode = true; cur = null; currentSavedId = null;
+    playing = false; tNow = 0;
     document.querySelectorAll('.mode-tab').forEach(b=>{
       b.classList.toggle('active', b.dataset.mode === 'free');
     });
-    const nav = document.getElementById('nav');
-    const dp = document.getElementById('drawPanel');
-    if(nav) nav.style.display = 'none';
-    if(dp) dp.style.display = 'block';
-
+    document.getElementById('nav').style.display = 'none';
+    document.getElementById('drawPanel').style.display = 'block';
     document.getElementById('tacName').textContent = 'Pizarra libre';
     document.getElementById('tacSub').textContent = 'Colocá fichas, trazá movimientos, reproducí.';
-
     clearTacticLayers();
     clearNode(getLayer('drawLayer'));
-
+    const pill = document.getElementById('phasePill');
+    pill.classList.remove('saved');
     recomputeTiming();
     if(strokes.length === 0) dur = 0.6;
     renderFreeNotes();
     updatePlayBtn();
     render();
   } else {
-    freeMode = false;
-    playing = false;
-
+    freeMode = false; playing = false; currentSavedId = null;
     document.querySelectorAll('.mode-tab').forEach(b=>{
       b.classList.toggle('active', b.dataset.mode === 'tactics');
     });
-    const nav = document.getElementById('nav');
-    const dp = document.getElementById('drawPanel');
-    if(nav) nav.style.display = 'block';
-    if(dp) dp.style.display = 'none';
-
+    document.getElementById('nav').style.display = 'block';
+    document.getElementById('drawPanel').style.display = 'none';
     clearNode(getLayer('drawLayer'));
-
     const activeBtn = document.querySelector('.tac-btn.active') || document.querySelector('.tac-btn');
-    if(activeBtn){
-      activeBtn.classList.add('active');
+    if(activeBtn && activeBtn.dataset.id && activeBtn.dataset.source !== 'saved'){
       const tac = TACTICS.find(t=>t.id === activeBtn.dataset.id);
       if(tac) loadTactic(tac);
     } else if(TACTICS.length){
@@ -1956,16 +1984,12 @@ function setMode(mode){
 function onPointerDown(e){
   if(!freeMode) return;
   e.preventDefault();
-  playing = false;
-  updatePlayBtn();
-
+  playing = false; updatePlayBtn();
   const p = svgPoint(e);
 
   if(drawTool === 'dot'){
     strokes.push({
-      type:'dot',
-      id: 'dot_' + Date.now() + '_' + Math.random().toString(36).substr(2,9),
-      x:p.x, y:p.y, color: drawColor,
+      type:'dot', id: uid('dot'), x:p.x, y:p.y, color: drawColor,
       number: '', name: '', t0:0, t1:0.35
     });
     recomputeTiming();
@@ -1973,7 +1997,6 @@ function onPointerDown(e){
     render();
     return;
   }
-
   if(drawTool === 'erase'){
     const idx = hitTest(p.x, p.y);
     if(idx >= 0){
@@ -1986,23 +2009,15 @@ function onPointerDown(e){
     return;
   }
 
-  // Trazo: detectar si empieza sobre una ficha existente
   isDrawing = true;
   let attachedTo = null;
   for(let i = strokes.length - 1; i >= 0; i--){
     const s = strokes[i];
-    if(s.type === 'dot'){
-      const d = Math.hypot(s.x - p.x, s.y - p.y);
-      if(d < 36){ attachedTo = s.id; break; }
+    if(s.type === 'dot' && Math.hypot(s.x - p.x, s.y - p.y) < 36){
+      attachedTo = s.id; break;
     }
   }
-
-  currentStroke = {
-    type:'path',
-    points:[[p.x, p.y]],
-    color: drawColor,
-    attachedTo: attachedTo
-  };
+  currentStroke = { type:'path', points:[[p.x, p.y]], color: drawColor, attachedTo };
   try{ svg.setPointerCapture(e.pointerId); }catch(_){}
   render();
 }
@@ -2013,8 +2028,7 @@ function onPointerMove(e){
   const p = svgPoint(e);
   const pts = currentStroke.points;
   const last = pts[pts.length-1];
-  const d = Math.hypot(p.x-last[0], p.y-last[1]);
-  if(d < 3.5) return;
+  if(Math.hypot(p.x-last[0], p.y-last[1]) < 3.5) return;
   pts.push([p.x, p.y]);
   render();
 }
@@ -2036,16 +2050,11 @@ function onPointerUp(e){
 
 function onSvgClick(e){
   if(!freeMode) return;
-  // Solo abrir el modal si NO se está por dibujar
   const p = svgPoint(e);
   const idx = hitTest(p.x, p.y);
   if(idx >= 0 && strokes[idx].type === 'dot' && drawTool !== 'erase'){
-    // Si el toque fue muy cerca de la ficha, abrimos el editor
     const s = strokes[idx];
-    const d = Math.hypot(s.x - p.x, s.y - p.y);
-    if(d < 22){
-      openEditModal(idx);
-    }
+    if(Math.hypot(s.x - p.x, s.y - p.y) < 22) openEditModal(idx);
   }
 }
 
@@ -2058,14 +2067,13 @@ svg.addEventListener('click', onSvgClick);
 svg.addEventListener('contextmenu', e=>{ if(freeMode) e.preventDefault(); });
 
 /* ============================================================
-   MODAL DE EDICIÓN
+   MODAL EDICIÓN DE FICHA
    ============================================================ */
 function openEditModal(index){
   editingStrokeIndex = index;
   const s = strokes[index];
   document.getElementById('editNumber').value = s.number || '';
   document.getElementById('editName').value = s.name || '';
-
   const colorRow = document.getElementById('editColorRow');
   clearNode(colorRow);
   COLORS.forEach(c=>{
@@ -2078,11 +2086,9 @@ function openEditModal(index){
     };
     colorRow.appendChild(btn);
   });
-
   document.getElementById('editModal').classList.add('show');
   setTimeout(()=>document.getElementById('editNumber').focus(), 100);
 }
-
 document.getElementById('btnEditCancel').onclick = ()=>{
   document.getElementById('editModal').classList.remove('show');
   editingStrokeIndex = -1;
@@ -2096,12 +2102,163 @@ document.getElementById('btnEditSave').onclick = ()=>{
   editingStrokeIndex = -1;
   render();
 };
-document.addEventListener('keydown', (e)=>{
-  if(e.key === 'Escape') document.getElementById('editModal').classList.remove('show');
-});
 document.getElementById('editModal').addEventListener('click', (e)=>{
   if(e.target === e.currentTarget) document.getElementById('editModal').classList.remove('show');
 });
+
+/* ============================================================
+   MODAL GUARDAR TÁCTICA
+   ============================================================ */
+document.getElementById('btnSaveTactic').onclick = ()=>{
+  if(!freeMode || strokes.length === 0){
+    alert('Primero dibujá una jugada en la pizarra libre');
+    return;
+  }
+  const current = currentSavedId ? (savedTactics.find(t=>t.id===currentSavedId) || clubTactics.find(t=>t.id===currentSavedId)) : null;
+  document.getElementById('saveName').value = current ? current.name : '';
+  document.getElementById('saveCat').value = current ? (current.cat || 'Ataque') : 'Ataque';
+  document.getElementById('saveDesc').value = current ? (current.sub || '') : '';
+  document.getElementById('saveModal').classList.add('show');
+  setTimeout(()=>document.getElementById('saveName').focus(), 100);
+};
+
+document.getElementById('btnSaveCancel').onclick = ()=>{
+  document.getElementById('saveModal').classList.remove('show');
+};
+
+document.getElementById('btnSaveConfirm').onclick = ()=>{
+  const nombre = document.getElementById('saveName').value.trim();
+  const cat = document.getElementById('saveCat').value;
+  const desc = document.getElementById('saveDesc').value.trim();
+  if(!nombre){
+    alert('Poné un nombre para la táctica');
+    return;
+  }
+
+  const nueva = {
+    id: currentSavedId || uid('user'),
+    name: nombre,
+    cat: cat,
+    sub: desc,
+    source: 'user',
+    strokes: deepCopy(strokes),
+    createdAt: new Date().toISOString()
+  };
+
+  if(currentSavedId){
+    // Actualizar existente (solo si era del usuario, no del club)
+    const idx = savedTactics.findIndex(t=>t.id===currentSavedId);
+    if(idx >= 0){
+      savedTactics[idx] = nueva;
+    } else {
+      // Era del club: guardar como copia del usuario
+      nueva.id = uid('user');
+      savedTactics.push(nueva);
+      currentSavedId = nueva.id;
+    }
+  } else {
+    savedTactics.push(nueva);
+    currentSavedId = nueva.id;
+  }
+
+  persistSaved();
+  rebuildNav();
+  document.getElementById('saveModal').classList.remove('show');
+  document.getElementById('tacName').textContent = nueva.name;
+  document.getElementById('tacSub').textContent = nueva.sub || 'Mi táctica';
+  renderFreeNotes();
+  render();
+};
+
+document.getElementById('saveModal').addEventListener('click', (e)=>{
+  if(e.target === e.currentTarget) document.getElementById('saveModal').classList.remove('show');
+});
+
+/* ============================================================
+   EXPORTAR / IMPORTAR / CLUB
+   ============================================================ */
+document.getElementById('btnExport').onclick = ()=>{
+  if(savedTactics.length === 0){
+    alert('No tenés tácticas guardadas todavía');
+    return;
+  }
+  const data = {
+    version: 1,
+    club: 'GEI Vóley',
+    exportedAt: new Date().toISOString(),
+    tacticas: savedTactics
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tacticas-gei-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+};
+
+document.getElementById('btnImport').onclick = ()=>{
+  document.getElementById('fileImport').click();
+};
+
+document.getElementById('fileImport').addEventListener('change', (e)=>{
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const data = JSON.parse(ev.target.result);
+      const incoming = data.tacticas || data.tactics || (Array.isArray(data) ? data : []);
+      if(!incoming.length) throw new Error('El archivo no contiene tácticas');
+      const existingIds = new Set(savedTactics.map(t=>t.id));
+      const nuevas = incoming.filter(t => t.id && !existingIds.has(t.id));
+      // Reasignar ids a las nuevas para evitar colisiones
+      nuevas.forEach(t=>{
+        if(!t.id || existingIds.has(t.id)) t.id = uid('user');
+        t.source = 'user';
+      });
+      savedTactics = [...savedTactics, ...nuevas];
+      persistSaved();
+      rebuildNav();
+      alert(`✅ Se importaron ${nuevas.length} tácticas nuevas (${incoming.length - nuevas.length} ya existían o fueron ignoradas)`);
+    }catch(err){
+      alert('❌ Error al importar: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';  // permitir reimportar el mismo archivo
+});
+
+document.getElementById('btnLoadClub').onclick = async ()=>{
+  try{
+    const res = await fetch('./tacticas-club.json?t=' + Date.now());
+    if(!res.ok) throw new Error('No se pudo descargar el archivo');
+    const data = await res.json();
+    const incoming = data.tacticas || [];
+    incoming.forEach(t=> t.source = 'club');
+    clubTactics = incoming;
+    try{ localStorage.setItem('gei-club-cache', JSON.stringify(clubTactics)); }catch(_){}
+    rebuildNav();
+    alert(`✅ Se cargaron ${clubTactics.length} tácticas del club`);
+  }catch(err){
+    alert('❌ No se pudieron cargar las tácticas del club.\n\n' + err.message + '\n\nVerificá que el archivo tacticas-club.json exista junto al index.html.');
+  }
+};
+
+function deleteCurrentSaved(){
+  if(!currentSavedId) return;
+  const savedTac = savedTactics.find(t=>t.id===currentSavedId);
+  if(!savedTac) return;
+  if(!confirm(`¿Borrar la táctica "${savedTac.name}"?`)) return;
+  savedTactics = savedTactics.filter(t=>t.id !== currentSavedId);
+  persistSaved();
+  currentSavedId = null;
+  rebuildNav();
+  renderFreeNotes();
+  render();
+}
 
 /* ============================================================
    CONTROLES
@@ -2122,7 +2279,6 @@ document.getElementById('scrub').oninput = e=>{
   tNow = (e.target.value/1000) * dur;
   render();
 };
-
 document.getElementById('btnFocus').onclick = ()=>{
   const app = document.getElementById('app');
   app.classList.toggle('focus');
@@ -2130,7 +2286,6 @@ document.getElementById('btnFocus').onclick = ()=>{
   document.getElementById('btnFocus').innerHTML = on
     ? '✕ <span class="hide-sm">Salir</span>'
     : '⛶ <span class="hide-sm">Modo tiempo muerto</span>';
-
   if(window.__fitCourt){
     window.__fitCourt();
     setTimeout(window.__fitCourt, 30);
@@ -2144,7 +2299,7 @@ document.getElementById('btnFocus').onclick = ()=>{
    TECLADO
    ============================================================ */
 document.addEventListener('keydown', e=>{
-  if(e.target.tagName === 'INPUT') return;
+  if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
   if(e.code === 'Space'){ e.preventDefault(); document.getElementById('btnPlay').click(); }
   if(e.code === 'KeyR'){ document.getElementById('btnReset').click(); }
   if(e.code === 'ArrowRight'){ tNow = Math.min(dur, tNow + 0.25); render(); }
@@ -2152,6 +2307,10 @@ document.addEventListener('keydown', e=>{
   if(freeMode && (e.ctrlKey || e.metaKey) && e.code === 'KeyZ'){
     e.preventDefault();
     document.getElementById('btnUndo').click();
+  }
+  if(e.key === 'Escape'){
+    document.getElementById('editModal').classList.remove('show');
+    document.getElementById('saveModal').classList.remove('show');
   }
 });
 
@@ -2162,58 +2321,25 @@ document.addEventListener('keydown', e=>{
   const btnMenu = document.getElementById('btnMenu');
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('drawerOverlay');
-
   if(!btnMenu || !sidebar || !overlay) return;
 
-  function openDrawer(){
-    sidebar.classList.add('open');
-    overlay.classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeDrawer(){
-    sidebar.classList.remove('open');
-    overlay.classList.remove('show');
-    document.body.style.overflow = '';
-  }
-  function toggleDrawer(){
-    if(sidebar.classList.contains('open')) closeDrawer();
-    else openDrawer();
-  }
+  function openDrawer(){ sidebar.classList.add('open'); overlay.classList.add('show'); document.body.style.overflow = 'hidden'; }
+  function closeDrawer(){ sidebar.classList.remove('open'); overlay.classList.remove('show'); document.body.style.overflow = ''; }
+  function toggleDrawer(){ sidebar.classList.contains('open') ? closeDrawer() : openDrawer(); }
 
   btnMenu.addEventListener('click', toggleDrawer);
   overlay.addEventListener('click', closeDrawer);
-
-  document.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape' && sidebar.classList.contains('open')){
-      closeDrawer();
-    }
-  });
-
-  document.querySelectorAll('.tac-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      if(window.innerWidth <= 900) closeDrawer();
-    });
-  });
-
   document.querySelectorAll('.mode-tab').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      if(window.innerWidth <= 900) closeDrawer();
-    });
+    btn.addEventListener('click', ()=>{ if(window.innerWidth <= 900) closeDrawer(); });
   });
-
-  window.addEventListener('resize', ()=>{
-    if(window.innerWidth > 900) closeDrawer();
-  });
-
+  window.addEventListener('resize', ()=>{ if(window.innerWidth > 900) closeDrawer(); });
   window.__closeDrawer = closeDrawer;
 })();
 
 /* ============================================================
    UI PIZARRA LIBRE
    ============================================================ */
-document.querySelectorAll('.mode-tab').forEach(b=>{
-  b.onclick = ()=> setMode(b.dataset.mode);
-});
+document.querySelectorAll('.mode-tab').forEach(b=>{ b.onclick = ()=> setMode(b.dataset.mode); });
 
 document.querySelectorAll('.tool-btn').forEach(b=>{
   b.onclick = ()=>{
@@ -2251,105 +2377,162 @@ document.getElementById('btnUndo').onclick = ()=>{
 document.getElementById('btnClear').onclick = ()=>{
   if(strokes.length === 0) return;
   if(!confirm('¿Borrar toda la pizarra?')) return;
-  strokes = [];
-  currentStroke = null;
-  dur = 0.6;
-  tNow = 0;
+  strokes = []; currentStroke = null; currentSavedId = null;
+  dur = 0.6; tNow = 0;
+  document.getElementById('tacName').textContent = 'Pizarra libre';
+  document.getElementById('tacSub').textContent = 'Colocá fichas, trazá movimientos, reproducí.';
+  renderFreeNotes();
   render();
 };
 
 /* ============================================================
-   NAVEGACIÓN DE TÁCTICAS
+   NAV DINÁMICO
    ============================================================ */
-(function buildNav(){
+function rebuildNav(){
   const nav = document.getElementById('nav');
   if(!nav) return;
-  const cats = [...new Set(TACTICS.map(t=>t.cat))];
-  cats.forEach(cat=>{
+  clearNode(nav);
+
+  function addCategory(title, items, source){
+    if(items.length === 0 && source === 'empty-skip') return;
     const h = document.createElement('div');
     h.className = 'cat-title';
-    h.textContent = cat;
+    h.innerHTML = `<span>${title}</span>` + (items.length ? `<span class="cat-count">${items.length}</span>` : '');
     nav.appendChild(h);
-    TACTICS.filter(t=>t.cat===cat).forEach(tac=>{
+
+    if(items.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'nav-empty';
+      empty.textContent = source === 'user' ? 'Todavía no guardaste tácticas. Dibujá una en Pizarra libre y tocá 💾 Guardar.' : 'Sin tácticas del club cargadas.';
+      nav.appendChild(empty);
+      return;
+    }
+
+    items.forEach(tac=>{
       const b = document.createElement('button');
       b.className = 'tac-btn';
-      b.textContent = tac.name;
       b.dataset.id = tac.id;
+      b.dataset.source = source;
+
+      const span = document.createElement('span');
+      span.className = 'tac-name';
+      span.textContent = tac.name;
+      b.appendChild(span);
+
+      if(source === 'user'){
+        const del = document.createElement('span');
+        del.className = 'tac-del';
+        del.textContent = '×';
+        del.title = 'Borrar';
+        del.onclick = (e)=>{
+          e.stopPropagation();
+          if(!confirm(`¿Borrar "${tac.name}"?`)) return;
+          savedTactics = savedTactics.filter(t=>t.id !== tac.id);
+          persistSaved();
+          if(currentSavedId === tac.id){ currentSavedId = null; }
+          rebuildNav();
+          renderFreeNotes();
+          render();
+        };
+        b.appendChild(del);
+      }
+
       b.onclick = ()=>{
         document.querySelectorAll('.tac-btn').forEach(x=>x.classList.remove('active'));
         b.classList.add('active');
-        if(freeMode) setMode('tactics');
+        if(window.innerWidth <= 900 && window.__closeDrawer) window.__closeDrawer();
+        if(source === 'base'){
+          setMode('tactics');
+          loadTactic(tac);
+        } else {
+          loadSavedTactic(tac);
+        }
+      };
+      nav.appendChild(b);
+    });
+  }
+
+  // Categoría: BASE del club (las 17 predefinidas)
+  const baseCats = [...new Set(TACTICS.map(t=>t.cat))];
+  baseCats.forEach(cat=>{
+    const items = TACTICS.filter(t=>t.cat===cat);
+    const h = document.createElement('div');
+    h.className = 'cat-title';
+    h.innerHTML = `<span>${cat}</span><span class="cat-count">${items.length}</span>`;
+    nav.appendChild(h);
+    items.forEach(tac=>{
+      const b = document.createElement('button');
+      b.className = 'tac-btn';
+      b.dataset.id = tac.id;
+      b.dataset.source = 'base';
+      const span = document.createElement('span');
+      span.className = 'tac-name';
+      span.textContent = tac.name;
+      b.appendChild(span);
+      b.onclick = ()=>{
+        document.querySelectorAll('.tac-btn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        if(window.innerWidth <= 900 && window.__closeDrawer) window.__closeDrawer();
+        setMode('tactics');
         loadTactic(tac);
       };
       nav.appendChild(b);
     });
   });
-})();
+
+  // Categoría: MIS TÁCTICAS
+  addCategory('Mis tácticas', savedTactics, 'user');
+
+  // Categoría: CLUB (del JSON externo)
+  if(clubTactics.length > 0){
+    addCategory('☁️ Tácticas del club', clubTactics, 'club');
+  }
+}
 
 /* ============================================================
    AJUSTE AUTOMÁTICO DE LA CANCHA
    ============================================================ */
 (function(){
   const RATIO = 470 / 840;
-
   function fitCourt(){
-    const wrap  = document.getElementById('courtWrap');
+    const wrap = document.getElementById('courtWrap');
     const court = document.getElementById('court');
     if(!wrap || !court) return;
-
     const cs = getComputedStyle(wrap);
     const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-    const padY = parseFloat(cs.paddingTop)  + parseFloat(cs.paddingBottom);
-    const w = wrap.clientWidth  - padX;
+    const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const w = wrap.clientWidth - padX;
     const h = wrap.clientHeight - padY;
-
     if(w <= 0 || h <= 0) return;
-
-    let width  = w;
-    let height = width / RATIO;
-
-    if(height > h){
-      height = h;
-      width  = height * RATIO;
-    }
-
-    court.style.width  = Math.round(width)  + 'px';
+    let width = w, height = width / RATIO;
+    if(height > h){ height = h; width = height * RATIO; }
+    court.style.width = Math.round(width) + 'px';
     court.style.height = Math.round(height) + 'px';
   }
-
   function scheduleFit(){
     requestAnimationFrame(fitCourt);
     setTimeout(fitCourt, 50);
     setTimeout(fitCourt, 200);
     setTimeout(fitCourt, 500);
   }
-
   window.addEventListener('load', scheduleFit);
   window.addEventListener('resize', fitCourt);
   window.addEventListener('orientationchange', scheduleFit);
-  document.addEventListener('DOMContentLoaded', scheduleFit);
-
   if(window.ResizeObserver){
     const wrap = document.getElementById('courtWrap');
-    if(wrap){
-      const ro = new ResizeObserver(fitCourt);
-      ro.observe(wrap);
-    }
+    if(wrap){ new ResizeObserver(fitCourt).observe(wrap); }
   }
-
   if(window.MutationObserver){
     const app = document.getElementById('app');
     if(app){
-      const mo = new MutationObserver(()=>{
+      new MutationObserver(()=>{
         fitCourt();
         setTimeout(fitCourt, 60);
         setTimeout(fitCourt, 200);
         setTimeout(fitCourt, 400);
-      });
-      mo.observe(app, { attributes: true, attributeFilter: ['class'] });
+      }).observe(app, { attributes: true, attributeFilter: ['class'] });
     }
   }
-
   scheduleFit();
   window.__fitCourt = fitCourt;
 })();
@@ -2360,10 +2543,19 @@ document.getElementById('btnClear').onclick = ()=>{
 function boot(){
   buildCourt();
   setupClubLogo();
+  loadSavedFromStorage();
+
+  // Intentar cargar cache de tácticas del club
+  try{
+    const cache = localStorage.getItem('gei-club-cache');
+    if(cache) clubTactics = JSON.parse(cache);
+  }catch(_){}
+
+  rebuildNav();
 
   if(TACTICS.length){
     const firstBtn = document.querySelector('.tac-btn');
-    if(firstBtn) firstBtn.classList.add('active');
+    if(firstBtn){ firstBtn.classList.add('active'); }
     loadTactic(TACTICS[0]);
   }
 
@@ -2379,6 +2571,17 @@ if(document.readyState === 'loading'){
 } else {
   boot();
 }
+
 </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/pizar_voley/sw.js', { scope: '/pizar_voley/' })
+        .then(reg => console.log('[PWA] SW registrado:', reg.scope))
+        .catch(err => console.error('[PWA] Error al registrar SW:', err));
+    });
+  }
+</script>
+
 </body>
 </html>
