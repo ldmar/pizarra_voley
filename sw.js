@@ -1,5 +1,5 @@
 /* Service Worker — Pizarra Táctica GEI Vóley */
-const CACHE_VERSION = 'pizarra_voley-v3.2';
+const CACHE_VERSION = 'pizarra_voley-v3.3';
 const BASE = '/pizarra_voley/';
 const CACHE_ASSETS = [
   BASE,
